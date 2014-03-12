@@ -79,7 +79,8 @@ do
 	#convert the group id to lowercase and remove spaces so that CKAN is ok with it
 	group_id=`echo $country | tr '[:upper:]' '[:lower:]' | tr -d ' '`
 	group_name=$country_name
-
+	relief_url="http://reliefweb.int/country/"$group_id
+	geojson=$group_id
 	. scripts/addGroup.sh
 	
 	dataset_id=$group_id
@@ -93,6 +94,8 @@ done < ${TEMP_COUNTRIES_FILE}.column
 #Create group for indicators
 group_id=earth
 group_name=Earth
+relief_url=   #not using
+geojson=   #not using
 . scripts/addGroup.sh
 
 echo "Adding indicators"
