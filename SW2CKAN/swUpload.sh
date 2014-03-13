@@ -1,7 +1,7 @@
 #!/bin/bash
 
-CKAN_INSTANCE=http://ckan.megginson.com
-CKAN_APIKEY=7ff5802e-b5ca-4b64-8b7f-a74138a28cd4
+CKAN_INSTANCE=
+CKAN_APIKEY=
 FILENAME=csv.zip
 PACKAGE_ID=the-big-scrape
 RESOURCE_ID=eb67a56d-971a-46eb-8027-4aa16e14d3d6
