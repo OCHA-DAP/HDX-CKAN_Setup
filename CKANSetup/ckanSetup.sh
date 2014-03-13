@@ -14,8 +14,8 @@ LOG_FOLDER=log
 COUNTRIES_FILE=countries.csv
 INDICATORS_FILE=indicators.csv
 #CKAN config
-CKAN_INSTANCE=
-CKAN_APIKEY=
+#CKAN_INSTANCE=
+#CKAN_APIKEY=
 
 #internal config
 TEMP_COUNTRIES_FILE=processed_countries.csv
