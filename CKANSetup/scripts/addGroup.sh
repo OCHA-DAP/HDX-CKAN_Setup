@@ -1,10 +1,10 @@
 #!/bin/bash
 
 #Variables needed by script and example data:
-#group_id=AFG
+#group_id=afg
 #group_name=Afghanistan
-#relief_url=http://reliefweb.int/country/afg
-#geojson=afg
+#relief_url=http://reliefweb.int/country/afg #(optional)
+#geojson=afg #(optional)
 
 #error string that's used to check for errors
 ERROR_GREP="\"success\": false\|Bad request - JSON Error"
@@ -14,6 +14,11 @@ ERROR_GREP="\"success\": false\|Bad request - JSON Error"
 extra_json=""
 if [ "$relief_url" ]; then
 	extra_json=$extra_json", \"relief_web_url\":\""$relief_url"\""
+	#if we have the requiest to put in the relief web url then we also need to put in the HR.info link
+	hrinfo=`cat $HR_INFO_FILE | ./scripts/csv.sh | grep -i "$group_id|" | cut -d '|' -f10`
+	if [ "$hrinfo" ]; then
+		extra_json=$extra_json", \"hr_info_url\":\""$hrinfo"\""
+	fi
 fi
 if [ "$geojson" ]; then
 	#getting the geojson for the country id in $geojson
@@ -33,6 +38,13 @@ if [ "$geojson" ]; then
 	end=${#geojson_result}
 	end=$[end-start-2]
 	geojson_result=${geojson_result:$start:$end}
+
+	secondResult=`echo "$geojson_result" | sed -n "s/},{.*//p" | wc -c`
+	if [ $secondResult -gt 0 ]; then
+		geojson_result=${geojson_result:0:$secondResult}
+	fi
+
+
 	#geojson_result=${geojson_result//'"'/'\"'}
 	if [ "$geojson_result" ]; then
 		extra_json=$extra_json", \"geojson\":"$geojson_result

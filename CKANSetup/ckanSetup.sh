@@ -13,6 +13,7 @@
 LOG_FOLDER=log
 COUNTRIES_FILE=countries.csv
 INDICATORS_FILE=indicators.csv
+HR_INFO_FILE=hr-info.csv
 #CKAN config
 #CKAN_INSTANCE=
 #CKAN_APIKEY=
@@ -49,6 +50,12 @@ if [ ! -f "$INDICATORS_FILE" ]
 then
     echo "Indicators file $INDICATORS_FILE does not exists, please get the latest version using this link: "
     echo "    https://docs.google.com/feeds/download/spreadsheets/Export?key=0AoSjej3U9V6fdHJzcWNreF8tVDNXTlpaeXl3Z3h3WWc&usp=sharing&gid=16&exportFormat=csv"
+    csv_files_not_found=true
+fi
+if [ ! -f "$HR_INFO_FILE" ]
+then
+    echo "HR.info file $HR_INFO_FILE does not exists, please get the latest version using this link: "
+    echo "    https://docs.google.com/feeds/download/spreadsheets/Export?key=1cM6TY9D5-Yebz3NK1rJnxhN89DsUCs6S9lL5MmjDCSw&usp=sharing&gid=0&exportFormat=csv"
     csv_files_not_found=true
 fi
 
