@@ -7,7 +7,7 @@
 
 #get indicator file like this
 #	https://docs.google.com/feeds/download/spreadsheets/Export?key=0AoSjej3U9V6fdHJzcWNreF8tVDNXTlpaeXl3Z3h3WWc&usp=sharing&gid=16&exportFormat=csv
-
+# 	(original doc) https://docs.google.com/spreadsheets/d/1cM6TY9D5-Yebz3NK1rJnxhN89DsUCs6S9lL5MmjDCSw/edit#gid=0
 
 #Importer config properties
 LOG_FOLDER=log
@@ -15,8 +15,8 @@ COUNTRIES_FILE=countries.csv
 INDICATORS_FILE=indicators.csv
 HR_INFO_FILE=hr-info.csv
 #CKAN config
-#CKAN_INSTANCE=
-#CKAN_APIKEY=
+CKAN_INSTANCE=a
+CKAN_APIKEY=b
 
 #internal config
 TEMP_COUNTRIES_FILE=processed_countries.csv
