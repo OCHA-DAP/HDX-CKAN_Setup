@@ -15,8 +15,8 @@ COUNTRIES_FILE=countries.csv
 INDICATORS_FILE=indicators.csv
 HR_INFO_FILE=hr-info.csv
 #CKAN config
-CKAN_INSTANCE=http://ocha4.drill.atman.ro:5000
-CKAN_APIKEY=44ca5af5-74bf-4beb-834b-2862abe76fce
+CKAN_INSTANCE=
+CKAN_APIKEY=
 
 #internal config
 TEMP_COUNTRIES_FILE=processed_countries.csv
