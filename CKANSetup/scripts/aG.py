@@ -9,6 +9,14 @@ def callckan(ckan_url, api_key, action, send_dict):
     thisurl = ckan_url + '/api/3/action/' + action
     request = urllib2.Request(thisurl)
     request.add_header('Authorization', api_key)
+
+    # comment the next 5 lines below to make the output less verbose
+    print '++++++++++++++++++++++'
+    print 'trying:'
+    print(ckan_url, api_key, action)
+    pprint.pprint(send_dict)
+    print '++++++++++++++++++++++'
+
     try:
         jsondata = urllib.quote(json.dumps(send_dict))
         response = urllib2.urlopen(request, jsondata)
@@ -46,7 +54,7 @@ def main():
             hr_obj = { "key":"hr_info_url","value": hr_url }
             extras.append(hr_obj)
         if geojson != "NONE":
-            geojson_obj = { "key":"hr_info_url","value": geojson }
+            geojson_obj = { "key":"geojson","value": geojson }
             extras.append(geojson_obj)
         send_dict['extras'] = extras
     else:
@@ -55,16 +63,7 @@ def main():
         print len(sys.argv)
         sys.exit(1)
 
-    try:
-        # comment the next 3 lines to make the script less verbose
-        print '++++++++++++++++++++++'
-        pprint.pprint(send_dict)
-        print '++++++++++++++++++++++'
-        # callckan(ckan_url, api_key, action, jsondata)
-        callckan(ckan_url, api_key, action, send_dict)
-    except:
-        print "Function call error!"
-        sys.exit(2)
+    callckan(ckan_url, api_key, action, send_dict)
 
 
 if __name__ == '__main__':
