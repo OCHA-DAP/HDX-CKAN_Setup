@@ -100,8 +100,8 @@ do
 done < ${TEMP_COUNTRIES_FILE}.column  
 
 #Create group for indicators
-group_id=earth
-group_name=Earth
+group_id=world
+group_name=World
 relief_url=   #not using
 geojson=   #not using
 . scripts/addGroup.sh
