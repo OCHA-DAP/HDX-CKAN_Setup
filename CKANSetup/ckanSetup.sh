@@ -17,7 +17,7 @@ HR_INFO_FILE=hr-info.csv
 #CKAN config
 CKAN_INSTANCE=
 CKAN_APIKEY=
-CPS_URL=http://data.ochadata.net:9231/hdx-1.0.0/
+CPS_URL=
 
 #internal config
 TEMP_COUNTRIES_FILE=processed_countries.csv
