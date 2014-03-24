@@ -17,6 +17,7 @@ HR_INFO_FILE=hr-info.csv
 #CKAN config
 CKAN_INSTANCE=
 CKAN_APIKEY=
+CPS_URL=http://data.ochadata.net:9231/hdx-1.0.0/
 
 #internal config
 TEMP_COUNTRIES_FILE=processed_countries.csv
@@ -117,6 +118,11 @@ do
 	tags='[{"name":"baseline"},{"name":"preparedness"}]'
 	#echo "Inserting indicator with code "$dataset_id" for "$dataset_name"" 
 	. scripts/addPackage.sh
+
+	indicator_type=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}|" | cut -d '|' -f3`
+	source_code=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}|" | cut -d '|' -f4`
+	resource_url="${CPS_URL}/api/exporter/indicator/xlsx/${indicator_type}/source/${source_code}/fromYear/1950/toYear/2014/language/en/${indicator_type}_baseline.xlsx"
+	. scripts/addIndicatorResource.sh
 done < ${TEMP_INDICATORS_FILE}.column
 
 #move processed files in the log folder and force user to reload the csv's on next run
