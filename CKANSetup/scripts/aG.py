@@ -9,14 +9,12 @@ def callckan(ckan_url, api_key, action, send_dict):
     thisurl = ckan_url + '/api/3/action/' + action
     request = urllib2.Request(thisurl)
     request.add_header('Authorization', api_key)
-
-    # comment the next 5 lines below to make the output less verbose
-    print '++++++++++++++++++++++'
-    print 'trying:'
-    print(ckan_url, api_key, action)
-    pprint.pprint(send_dict)
-    print '++++++++++++++++++++++'
-
+    # uncomment the next 5 lines below to make the output verbose
+    # print '++++++++++++++++++++++'
+    # print 'trying:'
+    # print(ckan_url, api_key, action)
+    # pprint.pprint(send_dict)
+    # print '++++++++++++++++++++++'
     try:
         jsondata = urllib.quote(json.dumps(send_dict))
         response = urllib2.urlopen(request, jsondata)
@@ -56,13 +54,15 @@ def main():
         if geojson != "NONE":
             geojson_obj = { "key":"geojson","value": geojson }
             extras.append(geojson_obj)
+        if len(extras) == 0 and action == 'group_update':
+            print 'No additional info to update... Skipping...'
+            sys.exit(0)
         send_dict['extras'] = extras
     else:
         print myname + ' <ckan_url> <ckan_api_key> <action> <group_id> [group_name] [rw_url] [hr_url] [geojson]'
         print sys.argv
         print len(sys.argv)
         sys.exit(1)
-
     callckan(ckan_url, api_key, action, send_dict)
 
 
