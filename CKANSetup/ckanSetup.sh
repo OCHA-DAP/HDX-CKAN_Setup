@@ -15,8 +15,8 @@ COUNTRIES_FILE=countries.csv
 INDICATORS_FILE=indicators.csv
 HR_INFO_FILE=hr-info.csv
 #CKAN config
-CKAN_INSTANCE=a
-CKAN_APIKEY=b
+CKAN_INSTANCE=
+CKAN_APIKEY=
 
 #internal config
 TEMP_COUNTRIES_FILE=processed_countries.csv
@@ -85,9 +85,10 @@ do
 	#echo "Inserting category with code "$country" for "$country_name""
 	#convert the group id to lowercase and remove spaces so that CKAN is ok with it
 	group_id=`echo $country | tr '[:upper:]' '[:lower:]' | tr -d ' '`
-	group_name=$country_name
+	group_name="$country_name"
 	relief_url="http://reliefweb.int/country/"$group_id
 	geojson=$group_id
+	echo "DOING $country_name"
 	. scripts/addGroup.sh
 	
 	dataset_id=$group_id
@@ -99,8 +100,8 @@ do
 done < ${TEMP_COUNTRIES_FILE}.column  
 
 #Create group for indicators
-group_id=earth
-group_name=Earth
+group_id=world
+group_name=World
 relief_url=   #not using
 geojson=   #not using
 . scripts/addGroup.sh
