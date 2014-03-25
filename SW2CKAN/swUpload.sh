@@ -17,7 +17,7 @@ wget --no-check-certificate https://ds-ec2.scraperwiki.com/enf6nmy/8ab0038b6f524
 
 curl $CKAN_INSTANCE/api/storage/auth/form/$DIRECTORY/$FILENAME -H Authorization:$CKAN_APIKEY > phase1
 curl $CKAN_INSTANCE/storage/upload_handle -H Authorization:$CKAN_APIKEY --form file=@$FILENAME --form "key=$DIRECTORY/$FILENAME" > phase2
-curl http://ckan.megginson.com/api/3/action/resource_update \
+curl $CKAN_INSTANCE/api/3/action/resource_update \
 	--data '{	"package_id":"'$PACKAGE_ID'", 
 				"id":"'$RESOURCE_ID'", 
 				"url":"'$CKAN_INSTANCE'/storage/f/'$DIRECTORY'/'$FILENAME'", 
