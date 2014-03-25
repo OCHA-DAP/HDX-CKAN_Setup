@@ -15,9 +15,9 @@ COUNTRIES_FILE=countries.csv
 INDICATORS_FILE=indicators.csv
 HR_INFO_FILE=hr-info.csv
 #CKAN config
-CKAN_INSTANCE=
-CKAN_APIKEY=
-CPS_URL=
+#CKAN_INSTANCE=
+#CKAN_APIKEY=
+#CPS_URL=
 
 #internal config
 TEMP_COUNTRIES_FILE=processed_countries.csv
@@ -96,7 +96,7 @@ do
 	dataset_name=$country" Baseline Data"
 	#add a country tag so that the dataset is searchable, also strip characters that are not letters, numbers, space, minus or dot
 	country_tag=`echo $country_name | sed 's/[^A-Za-z0-9 .-]*//g'`
-	tags='[{"name":"'"$dataset_id"'"}, {"name":"'"$country_tag"'"}, {"name":"baseline"},{"name":"preparedness"}]'
+	tags='[{"name":"'"$group_id"'"}, {"name":"'"$country_tag"'"}, {"name":"baseline"},{"name":"preparedness"}]'
 	. scripts/addPackage.sh	 
 done < ${TEMP_COUNTRIES_FILE}.column  
 
