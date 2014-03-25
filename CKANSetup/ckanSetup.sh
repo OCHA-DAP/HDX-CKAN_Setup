@@ -15,9 +15,9 @@ COUNTRIES_FILE=countries.csv
 INDICATORS_FILE=indicators.csv
 HR_INFO_FILE=hr-info.csv
 #CKAN config
-CKAN_INSTANCE=
-CKAN_APIKEY=
-CPS_URL=
+#CKAN_INSTANCE=
+#CKAN_APIKEY=
+#CPS_URL=
 
 #internal config
 TEMP_COUNTRIES_FILE=processed_countries.csv
@@ -92,12 +92,17 @@ do
 	echo "DOING $country_name"
 	. scripts/addGroup.sh
 	
-	dataset_id=$group_id
+	dataset_id=$group_id"_baseline_data"
 	dataset_name=$country" Baseline Data"
 	#add a country tag so that the dataset is searchable, also strip characters that are not letters, numbers, space, minus or dot
 	country_tag=`echo $country_name | sed 's/[^A-Za-z0-9 .-]*//g'`
-	tags='[{"name":"'"$dataset_id"'"}, {"name":"'"$country_tag"'"}, {"name":"baseline"},{"name":"preparedness"}]'
+	tags='[{"name":"'"$group_id"'"}, {"name":"'"$country_tag"'"}, {"name":"baseline"},{"name":"preparedness"}]'
 	. scripts/addPackage.sh	 
+
+	country_code_upper=`echo $country | tr -d ' '`
+	resource_url="${CPS_URL}/api/exporter/country/xlsx/${country_code_upper}/fromYear/1950/toYear/2014/language/EN/${country_code_upper}_baseline.xlsx"
+	resource_name=$group_id
+	. scripts/addResource.sh
 done < ${TEMP_COUNTRIES_FILE}.column  
 
 #Create group for indicators
@@ -122,7 +127,8 @@ do
 	indicator_type=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}|" | cut -d '|' -f3`
 	source_code=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}|" | cut -d '|' -f4`
 	resource_url="${CPS_URL}/api/exporter/indicator/xlsx/${indicator_type}/source/${source_code}/fromYear/1950/toYear/2014/language/en/${indicator_type}_baseline.xlsx"
-	. scripts/addIndicatorResource.sh
+	resource_name=$indicator_type
+	. scripts/addResource.sh
 done < ${TEMP_INDICATORS_FILE}.column
 
 #move processed files in the log folder and force user to reload the csv's on next run
