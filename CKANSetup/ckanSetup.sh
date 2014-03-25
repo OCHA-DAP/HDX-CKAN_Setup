@@ -92,7 +92,7 @@ do
 	echo "DOING $country_name"
 	. scripts/addGroup.sh
 	
-	dataset_id=$group_id
+	dataset_id=$group_id"_baseline_data"
 	dataset_name=$country" Baseline Data"
 	#add a country tag so that the dataset is searchable, also strip characters that are not letters, numbers, space, minus or dot
 	country_tag=`echo $country_name | sed 's/[^A-Za-z0-9 .-]*//g'`
