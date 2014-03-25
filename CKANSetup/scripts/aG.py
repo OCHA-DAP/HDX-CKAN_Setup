@@ -52,7 +52,9 @@ def main():
             hr_obj = { "key":"hr_info_url","value": hr_url }
             extras.append(hr_obj)
         if geojson != "NONE":
-            geojson_obj = { "key":"geojson","value": geojson }
+            geojson_json = json.loads(geojson)
+            geojson_json['properties']['url']="/group/"+group_id
+            geojson_obj = { "key":"geojson","value": json.dumps(geojson_json) }
             extras.append(geojson_obj)
         if len(extras) == 0 and action == 'group_update':
             print 'No additional info to update... Skipping...'
