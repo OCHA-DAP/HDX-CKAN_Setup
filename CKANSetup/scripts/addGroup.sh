@@ -31,7 +31,7 @@ if [ "$geojson" ]; then
 	    --data '{	
 		"key":"dbc50657c7",
 		"merge":1,
-		"query": [{"dataset":"AGMCAZMGC6UF916", "params":{"properties.name":"'$geojson'"}}],
+		"query": [{"dataset":"AGMCAZMGC6UF916", "params":{"id":"'$geojson'"}}],
 		"_limit": 1
 		}' > $action_file
     geojson_result=`cat $action_file`
