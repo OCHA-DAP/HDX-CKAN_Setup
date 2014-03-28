@@ -24,7 +24,8 @@ def callckan(ckan_url, api_key, action, send_dict):
     except:
         print "ERROR!!!"
         print '++++++++++++++++++++++'
-        pprint.pprint(ckan_url, api_key, action, send_dict)
+        pprint.pprint(ckan_url, api_key, action)
+        pprint.pprint(send_dict)
         print '++++++++++++++++++++++'
         sys.exit(1)
 

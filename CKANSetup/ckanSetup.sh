@@ -39,6 +39,12 @@ if [ ! "$CKAN_APIKEY" ]; then
 	echo "Please edit the script and add the api key in the CKAN_APIKEY variable!"
 	exit;
 fi
+
+#download the latest csv files by exporting them from Google Docs
+wget -q --no-check-certificate -O countries.csv 'https://docs.google.com/spreadsheet/ccc?key=0AoSjej3U9V6fdHJzcWNreF8tVDNXTlpaeXl3Z3h3WWc&output=csv&usp=drive_web&gid=15'
+wget -q --no-check-certificate -O indicators.csv 'https://docs.google.com/spreadsheet/ccc?key=0AoSjej3U9V6fdHJzcWNreF8tVDNXTlpaeXl3Z3h3WWc&output=csv&usp=drive_web&gid=16'
+wget -q --no-check-certificate -O hr-info.csv 'https://docs.google.com/spreadsheets/d/1cM6TY9D5-Yebz3NK1rJnxhN89DsUCs6S9lL5MmjDCSw/export?format=csv&id=1cM6TY9D5-Yebz3NK1rJnxhN89DsUCs6S9lL5MmjDCSw&gid=0'
+
 #Test to see if the import files exist
 csv_files_not_found=false
 if [ ! -f "$COUNTRIES_FILE" ]
@@ -134,6 +140,7 @@ done < ${TEMP_INDICATORS_FILE}.column
 #move processed files in the log folder and force user to reload the csv's on next run
 mv $COUNTRIES_FILE $LOG_FOLDER/
 mv $INDICATORS_FILE $LOG_FOLDER/
+mv $HR_INFO_FILE $LOG_FOLDER/
 
 run_date=`date +'%Y-%m-%d_%H-%M-%S'`
 mv $LOG_FOLDER $LOG_FOLDER.$run_date
