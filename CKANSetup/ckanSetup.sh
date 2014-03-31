@@ -78,7 +78,7 @@ rm $LOG_FOLDER/*
 #process csv's
 echo "Processing countries csv file"
 #countries file has 1 header line, skipping it
-tail -n+2 $COUNTRIES_FILE | ./scripts/csv.sh | grep "|y|" > $TEMP_COUNTRIES_FILE 
+tail -n+2 $COUNTRIES_FILE | ./scripts/csv.sh | grep "|y|" > $TEMP_COUNTRIES_FILE
 echo "Processing indicators csv file"
 #indicators file has 2 header lines will skip them
 tail -n+2 $INDICATORS_FILE | ./scripts/csv.sh | grep "y|" > $TEMP_INDICATORS_FILE
@@ -86,8 +86,8 @@ tail -n+2 $INDICATORS_FILE | ./scripts/csv.sh | grep "y|" > $TEMP_INDICATORS_FIL
 echo "Adding countries"
 #Iterate over countries list
 cut -d '|' -f2 ${TEMP_COUNTRIES_FILE} > ${TEMP_COUNTRIES_FILE}.column
-while read -r country; 
-do 
+while read -r country;
+do
 	country_name=`cat ${TEMP_COUNTRIES_FILE} | grep "|${country}|" | cut -d '|' -f1`
 	#echo "Inserting category with code "$country" for "$country_name""
 	#convert the group id to lowercase and remove spaces so that CKAN is ok with it
@@ -97,19 +97,19 @@ do
 	geojson=$group_id
 	echo "DOING $country_name"
 	. scripts/addGroup.sh
-	
+
 	dataset_id=$group_id"_baseline_data"
 	dataset_name=$country" Baseline Data"
 	#add a country tag so that the dataset is searchable, also strip characters that are not letters, numbers, space, minus or dot
 	country_tag=`echo $country_name | sed 's/[^A-Za-z0-9 .-]*//g'`
 	tags='[{"name":"'"$group_id"'"}, {"name":"'"$country_tag"'"}, {"name":"baseline"},{"name":"preparedness"}]'
-	. scripts/addPackage.sh	 
+	. scripts/addPackage.sh
 
 	country_code_upper=`echo $country | tr -d ' '`
 	resource_url="${CPS_URL}/api/exporter/country/xlsx/${country_code_upper}/fromYear/1950/toYear/2014/language/EN/${country_code_upper}_baseline.xlsx"
-	resource_name=$group_id
+	resource_name=$country"_Baseline.xlsx"
 	. scripts/addResource.sh
-done < ${TEMP_COUNTRIES_FILE}.column  
+done < ${TEMP_COUNTRIES_FILE}.column
 
 #Create group for indicators
 group_id=world
@@ -121,19 +121,19 @@ geojson=   #not using
 echo "Adding indicators"
 #Iterate over indicators list
 cut -d '|' -f2 ${TEMP_INDICATORS_FILE} > ${TEMP_INDICATORS_FILE}.column
-while read -r indicator; 
+while read -r indicator;
 do
 	#convert all upper chars to lower; then convert space into "_"; then remove all characters except a-z,0-9,"-" and "_"; then replace "__" with "_"
 	dataset_id=`echo $indicator | tr '[:upper:]' '[:lower:]' | tr ' ' '_' | sed 's/[^a-z0-9_-]*//g' | sed "s/__/_/g" | sed 's:_$::'`
-	dataset_name=$indicator 
+	dataset_name=$indicator
 	tags='[{"name":"baseline"},{"name":"preparedness"}]'
-	#echo "Inserting indicator with code "$dataset_id" for "$dataset_name"" 
+	#echo "Inserting indicator with code "$dataset_id" for "$dataset_name""
 	. scripts/addPackage.sh
 
 	indicator_type=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}|" | cut -d '|' -f3`
 	source_code=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}|" | cut -d '|' -f4`
 	resource_url="${CPS_URL}/api/exporter/indicator/xlsx/${indicator_type}/source/${source_code}/fromYear/1950/toYear/2014/language/en/${indicator_type}_baseline.xlsx"
-	resource_name=$indicator_type
+	resource_name=$indicator_type"_Baseline.xlsx"
 	. scripts/addResource.sh
 done < ${TEMP_INDICATORS_FILE}.column
 
@@ -144,7 +144,3 @@ mv $HR_INFO_FILE $LOG_FOLDER/
 
 run_date=`date +'%Y-%m-%d_%H-%M-%S'`
 mv $LOG_FOLDER $LOG_FOLDER.$run_date
-
-
-
-
