@@ -99,7 +99,7 @@ do
 	. scripts/addGroup.sh
 
 	dataset_id=$group_id"_baseline_data"
-	dataset_name=$country" Baseline Data"
+	dataset_name=$country_name" Baseline Data"
 	#add a country tag so that the dataset is searchable, also strip characters that are not letters, numbers, space, minus or dot
 	country_tag=`echo $country_name | sed 's/[^A-Za-z0-9 .-]*//g'`
 	tags='[{"name":"'"$group_id"'"}, {"name":"'"$country_tag"'"}, {"name":"baseline"},{"name":"preparedness"}]'
@@ -130,8 +130,9 @@ do
 	#echo "Inserting indicator with code "$dataset_id" for "$dataset_name""
 	. scripts/addPackage.sh
 
-	indicator_type=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}|" | cut -d '|' -f3`
-	source_code=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}|" | cut -d '|' -f4`
+	indicator_type=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}" | cut -d '|' -f3`
+  echo "Indicator type is:"$indicator_type" and indicator: |"$indicator"|"
+	source_code=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}" | cut -d '|' -f4`
 	resource_url="${CPS_URL}/api/exporter/indicator/xlsx/${indicator_type}/source/${source_code}/fromYear/1950/toYear/2014/language/en/${indicator_type}_baseline.xlsx"
 	resource_name=$indicator_type"_Baseline.xlsx"
 	. scripts/addResource.sh
