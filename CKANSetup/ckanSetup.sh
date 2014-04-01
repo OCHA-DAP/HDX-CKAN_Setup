@@ -145,14 +145,21 @@ do
 done < ${TEMP_INDICATORS_FILE}.column
 
 echo "Adding package Raw ScraperWiki Input"
-dataset_id=raw-scraperwiki-input-test
-dataset_name="Raw ScraperWiki Input Test"
+dataset_id=raw-scraperwiki-input
+dataset_name="Raw ScraperWiki Input"
 tags='[]'
 . scripts/addPackage.sh
 #add a fake resource to it
 resource_url="http://test.com"
 resource_name="cvs.zip"
 . scripts/addResource.sh
+new_resource_log=`cat $action_file`
+start=`echo "$new_resource_log" | sed -n "s/\"id\":.*//p" | wc -c`
+start=$[start+3]
+end=40
+new_resource_id=${new_resource_log:$start:$end}
+echo "New resource id is: "$new_resource_id
+
 
 #move processed files in the log folder and force user to reload the csv's on next run
 mv $COUNTRIES_FILE $LOG_FOLDER/
