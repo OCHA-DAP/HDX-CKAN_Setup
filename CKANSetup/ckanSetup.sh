@@ -14,6 +14,7 @@ LOG_FOLDER=log
 COUNTRIES_FILE=countries.csv
 INDICATORS_FILE=indicators.csv
 HR_INFO_FILE=hr-info.csv
+RAW_SW_RESOURCE_ID_FILE=raw-sw-resource-id.txt
 #CKAN config
 #CKAN_INSTANCE=
 #CKAN_APIKEY=
@@ -155,10 +156,11 @@ resource_name="cvs.zip"
 . scripts/addResource.sh
 new_resource_log=`cat $action_file`
 start=`echo "$new_resource_log" | sed -n "s/\"id\":.*//p" | wc -c`
-start=$[start+3]
-end=40
+start=$[start+5]
+end=38
 new_resource_id=${new_resource_log:$start:$end}
 echo "New resource id is: "$new_resource_id
+echo "$new_resource_id" > $RAW_SW_RESOURCE_ID_FILE
 
 
 #move processed files in the log folder and force user to reload the csv's on next run
