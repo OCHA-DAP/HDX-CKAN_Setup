@@ -1,10 +1,11 @@
 #!/bin/bash
 
 #Variables needed by script and example data:
-#dataset_id=AFG 
+#dataset_id=AFG
 #dataset_name=AFG Baseline Data
 #tags='[{"name":"AFG"}, {"name":"Afghanistan"}, {"name":"baseline"},{"name":"preparedness"}]'
 #group_id=AFG
+#org_id=hdx   #optional
 
 #error string that's used to check for errors
 ERROR_GREP="\"success\": false\|Bad request - JSON Error"
@@ -27,16 +28,20 @@ else
 	extra_json=""
 fi
 
+if [ "$org_id" ]; then
+	extra_json=$extra_json" \"owner_org\":\"$org_id\", "
+fi
+
 #create package
 #action is set in the previous step
 action_file=$LOG_FOLDER/tmp_$action.$dataset_id.log
 curl -s $CKAN_INSTANCE/api/3/action/$action \
 	--data '{	'"$extra_json"'
 				"name":"'"$dataset_id"'",
-				"title":"'"$dataset_name"'", 
+				"title":"'"$dataset_name"'",
 				"state":"active",
 				"tags":'"$tags"',
-				"groups":[{"id":"'"$group_id"'"}]				 
+				"groups":[{"id":"'"$group_id"'"}]
 			}' \
 	-H Authorization:$CKAN_APIKEY > $action_file
 result=`cat $action_file | grep "$ERROR_GREP"`
