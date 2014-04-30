@@ -41,7 +41,8 @@ curl -s $CKAN_INSTANCE/api/3/action/$action \
 				"title":"'"$dataset_name"'",
 				"state":"active",
 				"tags":'"$tags"',
-				"groups":[{"id":"'"$group_id"'"}]
+				"groups":[{"id":"'"$group_id"'"}],
+				"package_creator": "import-script"
 			}' \
 	-H Authorization:$CKAN_APIKEY > $action_file
 result=`cat $action_file | grep "$ERROR_GREP"`
