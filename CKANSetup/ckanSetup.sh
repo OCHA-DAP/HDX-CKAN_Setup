@@ -115,7 +115,19 @@ do
 	country_code_upper=`echo $country | tr -d ' '`
 	resource_url="${CPS_URL}/api/exporter/country/xlsx/${country_code_upper}/fromYear/1950/toYear/2014/language/EN/${country_code_upper}_baseline.xlsx"
 	resource_name=$country"_Baseline.xlsx"
+  resource_format="xlsx"
 	. scripts/addResource.sh
+
+  resource_url="${CPS_URL}/api/exporter/country/csv/${country_code_upper}/fromYear/1950/toYear/2014/language/EN/${country_code_upper}_baseline.csv"
+  resource_name=$country"_Baseline.csv"
+  resource_format="csv"
+  . scripts/addResource.sh
+
+  resource_url="${CPS_URL}/api/exporter/country/readme/${country_code_upper}/language/EN/ReadMe.txt"
+  resource_name=$country"_Readme.txt"
+  resource_format="txt"
+  . scripts/addResource.sh
+
 done < ${TEMP_COUNTRIES_FILE}.column
 
 #Create group for indicators
@@ -142,7 +154,13 @@ do
 	source_code=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}" | cut -d '|' -f4`
 	resource_url="${CPS_URL}/api/exporter/indicator/xlsx/${indicator_type}/source/${source_code}/fromYear/1950/toYear/2014/language/en/${indicator_type}_baseline.xlsx"
 	resource_name=$indicator_type"_Baseline.xlsx"
+  resource_format="xlsx"
 	. scripts/addResource.sh
+
+  resource_url="${CPS_URL}/api/exporter/indicatorMetadata/csv/${indicator_type}/language/en/${indicator_type}_baseline.xlsx"
+  resource_name=$indicator_type"_Baseline.csv"
+  resource_format="csv"
+  . scripts/addResource.sh
 done < ${TEMP_INDICATORS_FILE}.column
 
 echo "Adding package Raw ScraperWiki Input"
@@ -153,6 +171,7 @@ tags='[]'
 #add a fake resource to it
 resource_url="http://test.com"
 resource_name="cvs.zip"
+resource_format="csv"
 . scripts/addResource.sh
 new_resource_log=`cat $action_file`
 start=`echo "$new_resource_log" | sed -n "s/\"id\":.*//p" | wc -c`
