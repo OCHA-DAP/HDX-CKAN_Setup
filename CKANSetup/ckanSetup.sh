@@ -107,6 +107,7 @@ do
 
 	dataset_id=$group_id"_baseline_data"
 	dataset_name=$country_name" Baseline Data"
+  dataset_description="A compilation of time-series data from a variety of sources reported at the national level. Additional information about the sources is available in the file."
 	#add a country tag so that the dataset is searchable, also strip characters that are not letters, numbers, space, minus or dot
 	country_tag=`echo $country_name | sed 's/[^A-Za-z0-9 .-]*//g'`
 	tags='[{"name":"'"$group_id"'"}, {"name":"'"$country_tag"'"}, {"name":"baseline"},{"name":"preparedness"}]'
@@ -115,16 +116,19 @@ do
 	country_code_upper=`echo $country | tr -d ' '`
 	resource_url="${CPS_URL}/api/exporter/country/xlsx/${country_code_upper}/fromYear/1950/toYear/2014/language/EN/${country_code_upper}_baseline.xlsx"
 	resource_name=$country"_Baseline.xlsx"
+  resource_description="Same as dataset description"
   resource_format="xlsx"
 	. scripts/addResource.sh
 
   resource_url="${CPS_URL}/api/exporter/country/csv/${country_code_upper}/fromYear/1950/toYear/2014/language/EN/${country_code_upper}_baseline.csv"
   resource_name=$country"_Baseline.csv"
+  resource_description="Same as dataset description"
   resource_format="csv"
   . scripts/addResource.sh
 
   resource_url="${CPS_URL}/api/exporter/country/readme/${country_code_upper}/language/EN/ReadMe.txt"
   resource_name=$country"_Readme.txt"
+  resource_description="Supporting information for the accompanying CSV file"
   resource_format="txt"
   . scripts/addResource.sh
 
@@ -145,6 +149,7 @@ do
 	#convert all upper chars to lower; then convert space into "_"; then remove all characters except a-z,0-9,"-" and "_"; then replace "__" with "_"
 	dataset_id=`echo $indicator | tr '[:upper:]' '[:lower:]' | tr ' ' '_' | sed 's/[^a-z0-9_-]*//g' | sed "s/__/_/g" | sed 's:_$::'`
 	dataset_name=$indicator
+  dataset_description=""
 	tags='[{"name":"baseline"},{"name":"preparedness"}]'
 	#echo "Inserting indicator with code "$dataset_id" for "$dataset_name""
 	. scripts/addPackage.sh
@@ -154,11 +159,13 @@ do
 	source_code=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}" | cut -d '|' -f4`
 	resource_url="${CPS_URL}/api/exporter/indicator/xlsx/${indicator_type}/source/${source_code}/fromYear/1950/toYear/2014/language/en/${indicator_type}_baseline.xlsx"
 	resource_name=$indicator_type"_Baseline.xlsx"
+  resource_description="Same as dataset description"
   resource_format="xlsx"
 	. scripts/addResource.sh
 
   resource_url="${CPS_URL}/api/exporter/indicatorMetadata/csv/${indicator_type}/language/en/${indicator_type}_baseline.xlsx"
   resource_name=$indicator_type"_Baseline.csv"
+  resource_description="Same as dataset description"
   resource_format="csv"
   . scripts/addResource.sh
 done < ${TEMP_INDICATORS_FILE}.column

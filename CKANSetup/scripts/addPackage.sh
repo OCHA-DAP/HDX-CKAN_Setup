@@ -3,6 +3,7 @@
 #Variables needed by script and example data:
 #dataset_id=AFG
 #dataset_name=AFG Baseline Data
+#dataset_description
 #tags='[{"name":"AFG"}, {"name":"Afghanistan"}, {"name":"baseline"},{"name":"preparedness"}]'
 #group_id=AFG
 #org_id=hdx   #optional
@@ -30,6 +31,10 @@ fi
 
 if [ "$org_id" ]; then
 	extra_json=$extra_json" \"owner_org\":\"$org_id\", "
+fi
+
+if [ "$dataset_description" ]; then
+	extra_json=$extra_json" \"notes\":\"$dataset_description\", "
 fi
 
 #create package

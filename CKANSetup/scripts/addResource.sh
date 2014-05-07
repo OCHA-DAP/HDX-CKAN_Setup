@@ -5,6 +5,7 @@
 #resource_url=http://.....
 #resource_name=...
 #resource_format=xlsx
+#resource_description=...
 
 #error string that's used to check for errors
 ERROR_GREP="\"success\": false\|Bad request - JSON Error"
@@ -20,6 +21,7 @@ curl -s $CKAN_INSTANCE/api/3/action/$action \
 				"url":"'"$resource_url"'",
 				"name":"'"$resource_name"'",
 				"format":"'"$resource_format"'",
+				"description":"'"$resource_description"'",
 				"id":"'"$resource_name"'"
 			}' \
 	-H Authorization:$CKAN_APIKEY > $action_file
