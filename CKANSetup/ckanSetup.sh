@@ -177,7 +177,7 @@ tags='[]'
 . scripts/addPackage.sh
 #add a fake resource to it
 resource_url="http://test.com"
-resource_name="cvs.zip"
+resource_name="csv.zip"
 resource_format="csv"
 . scripts/addResource.sh
 new_resource_log=`cat $action_file`
