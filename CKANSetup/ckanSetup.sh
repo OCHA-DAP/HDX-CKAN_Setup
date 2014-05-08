@@ -15,10 +15,6 @@ COUNTRIES_FILE=countries.csv
 INDICATORS_FILE=indicators.csv
 HR_INFO_FILE=hr-info.csv
 RAW_SW_RESOURCE_ID_FILE=raw-sw-resource-id.txt
-#CKAN config
-#CKAN_INSTANCE=
-#CKAN_APIKEY=
-#CPS_URL=
 
 #internal config
 TEMP_COUNTRIES_FILE=processed_countries.csv
