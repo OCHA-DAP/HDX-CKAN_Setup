@@ -19,11 +19,13 @@ RAW_SW_RESOURCE_ID_FILE=raw-sw-resource-id.txt
 #internal config
 TEMP_COUNTRIES_FILE=processed_countries.csv
 TEMP_INDICATORS_FILE=processed_indicators.csv
+TEMP_INDICATORS_META_FILE=processed_indicators-meta.csv
  #set internal field separator to new line so that for will behave as expected
 
 #put processed files into the log folder
 TEMP_COUNTRIES_FILE=$LOG_FOLDER/$TEMP_COUNTRIES_FILE
 TEMP_INDICATORS_FILE=$LOG_FOLDER/$TEMP_INDICATORS_FILE
+TEMP_INDICATORS_META_FILE=$LOG_FOLDER/$TEMP_INDICATORS_META_FILE
 
 #checking if the ckan instance is present
 if [ ! "$CKAN_INSTANCE" ]; then
@@ -38,9 +40,12 @@ if [ ! "$CKAN_APIKEY" ]; then
 fi
 
 #download the latest csv files by exporting them from Google Docs
-wget -q --no-check-certificate -O countries.csv 'https://docs.google.com/spreadsheet/ccc?key=0AoSjej3U9V6fdHJzcWNreF8tVDNXTlpaeXl3Z3h3WWc&output=csv&usp=drive_web&gid=15'
-wget -q --no-check-certificate -O indicators.csv 'https://docs.google.com/spreadsheet/ccc?key=0AoSjej3U9V6fdHJzcWNreF8tVDNXTlpaeXl3Z3h3WWc&output=csv&usp=drive_web&gid=16'
-wget -q --no-check-certificate -O hr-info.csv 'https://docs.google.com/spreadsheets/d/1cM6TY9D5-Yebz3NK1rJnxhN89DsUCs6S9lL5MmjDCSw/export?format=csv&id=1cM6TY9D5-Yebz3NK1rJnxhN89DsUCs6S9lL5MmjDCSw&gid=0'
+wget -q --no-check-certificate -O $COUNTRIES_FILE 'https://docs.google.com/spreadsheet/ccc?key=0AoSjej3U9V6fdHJzcWNreF8tVDNXTlpaeXl3Z3h3WWc&output=csv&usp=drive_web&gid=15'
+wget -q --no-check-certificate -O $INDICATORS_FILE 'https://docs.google.com/spreadsheet/ccc?key=0AoSjej3U9V6fdHJzcWNreF8tVDNXTlpaeXl3Z3h3WWc&output=csv&usp=drive_web&gid=16'
+wget -q --no-check-certificate -O $HR_INFO_FILE 'https://docs.google.com/spreadsheets/d/1cM6TY9D5-Yebz3NK1rJnxhN89DsUCs6S9lL5MmjDCSw/export?format=csv&id=1cM6TY9D5-Yebz3NK1rJnxhN89DsUCs6S9lL5MmjDCSw&gid=0'
+#please enable indicator metadata download when the doc has been made public
+#wget -q --no-check-certificate -O $INDICATORS_META_FILE 'https://docs.google.com/spreadsheet/ccc?key=1IEeexTF_4SJNirYSTuGym1ybKMcigMUGsRrGTuovKlM&output=csv&usp=drive_web&gid=318994838'
+
 
 #Test to see if the import files exist
 csv_files_not_found=false
@@ -63,6 +68,13 @@ then
     csv_files_not_found=true
 fi
 
+if [ ! -f "$INDICATORS_META_FILE" ]
+then
+    echo "Indicators Metadata file $INDICATORS_META_FILE does not exists, please get the latest version using this link: "
+    echo "    https://docs.google.com/spreadsheet/ccc?key=1IEeexTF_4SJNirYSTuGym1ybKMcigMUGsRrGTuovKlM&output=csv&usp=drive_web&gid=318994838"
+    csv_files_not_found=true
+fi
+
 if $csv_files_not_found; then
 	exit;
 fi
@@ -79,6 +91,9 @@ tail -n+2 $COUNTRIES_FILE | ./scripts/csv.sh > $TEMP_COUNTRIES_FILE
 echo "Processing indicators csv file"
 #indicators file has 2 header lines will skip them
 tail -n+2 $INDICATORS_FILE | ./scripts/csv.sh | grep "y|" > $TEMP_INDICATORS_FILE
+echo "Processing indicators csv file"
+#indicators file has 1 header line, skipping it
+tail -n+2 $INDICATORS_META_FILE | ./scripts/csv.sh > $TEMP_INDICATORS_META_FILE
 
 echo "Adding organization HDX"
 org_id=hdx
@@ -142,6 +157,19 @@ echo "Adding indicators"
 cut -d '|' -f2 ${TEMP_INDICATORS_FILE} > ${TEMP_INDICATORS_FILE}.column
 while read -r indicator;
 do
+  #getting indicator metadata
+  indicator_meta=`cat ${TEMP_INDICATORS_META_FILE} | grep "|${indicator}|" | sed "s/\;/ /" | sed "s/\"\"/'/"`
+  ckan_source=`echo $indicator_meta | cut -d '|' -f5`
+  ckan_license=`echo $indicator_meta | cut -d '|' -f14`
+  ckan_date_min=`echo $indicator_meta | cut -d '|' -f11`
+  ckan_date_max=`echo $indicator_meta | cut -d '|' -f12`
+  ckan_methodology="`echo $indicator_meta | cut -d '|' -f10`"
+  ckan_caveats=`echo $indicator_meta | cut -d '|' -f13`
+  # echo "Row: "$indicator_meta
+  # echo "Source:"$ckan_source
+  # echo "Meth:"$ckan_methodology
+  # echo "Caveats:"$ckan_caveats
+
 	#convert all upper chars to lower; then convert space into "_"; then remove all characters except a-z,0-9,"-" and "_"; then replace "__" with "_"
 	dataset_id=`echo $indicator | tr '[:upper:]' '[:lower:]' | tr ' ' '_' | sed 's/[^a-z0-9_-]*//g' | sed "s/__/_/g" | sed 's:_$::'`
 	dataset_name=$indicator
@@ -150,21 +178,30 @@ do
 	#echo "Inserting indicator with code "$dataset_id" for "$dataset_name""
 	. scripts/addPackage.sh
 
-	indicator_type=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}" | cut -d '|' -f3`
+  #preparing to add resources
+	indicator_type=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}|" | cut -d '|' -f3`
   echo "Indicator type is:"$indicator_type" and indicator: |"$indicator"|"
-	source_code=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}" | cut -d '|' -f4`
+	source_code=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}|" | cut -d '|' -f4`
+
+  #Adding resources
 	resource_url="${CPS_URL}/api/exporter/indicator/xlsx/${indicator_type}/source/${source_code}/fromYear/1950/toYear/2014/language/en/${indicator_type}_baseline.xlsx"
 	resource_name=$indicator_type"_Baseline.xlsx"
   resource_description="Same as dataset description"
   resource_format="xlsx"
 	. scripts/addResource.sh
 
-  resource_url="${CPS_URL}/api/exporter/indicatorMetadata/csv/${indicator_type}/language/en/${indicator_type}_baseline.xlsx"
+  resource_url="${CPS_URL}/api/exporter/indicatorMetadata/csv/${indicator_type}/language/en/${indicator_type}_baseline.csv"
   resource_name=$indicator_type"_Baseline.csv"
   resource_description="Same as dataset description"
   resource_format="csv"
   . scripts/addResource.sh
 done < ${TEMP_INDICATORS_FILE}.column
+ckan_source=
+ckan_license=
+ckan_date_min=
+ckan_date_max=
+ckan_methodology=
+ckan_caveats=
 
 echo "Adding package Raw ScraperWiki Input"
 dataset_id=raw-scraperwiki-input

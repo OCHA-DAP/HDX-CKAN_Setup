@@ -37,6 +37,24 @@ if [ "$dataset_description" ]; then
 	extra_json=$extra_json" \"notes\":\"$dataset_description\", "
 fi
 
+if [ "$ckan_source" ]; then
+	extra_json=$extra_json" \"dataset_source\":\"$ckan_source\", "
+fi
+
+# if [ "$ckan_license" ]; then
+# fi
+#
+# if [ "$ckan_date" ]; then
+# fi
+
+if [ "$ckan_methodology" ]; then
+	extra_json=$extra_json" \"methodology\":\"$ckan_methodology\", "
+fi
+
+if [ "$ckan_caveats" ]; then
+	extra_json=$extra_json" \"caveats\":\"$ckan_caveats\", "
+fi
+
 #create package
 #action is set in the previous step
 action_file=$LOG_FOLDER/tmp_$action.$dataset_id.log
@@ -54,5 +72,5 @@ result=`cat $action_file | grep "$ERROR_GREP"`
 if [ "$result" ]; then
 	echo "<<<ERROR while executing action "$action" on dataset "$dataset_id" with name: "$dataset_name
 fi
-
+extra_json=
 echo "Done adding/updating dataset "$dataset_id" with title: "$dataset_name
