@@ -13,20 +13,17 @@
 LOG_FOLDER=log
 COUNTRIES_FILE=countries.csv
 INDICATORS_FILE=indicators.csv
-INDICATORS_META_FILE=indicators-meta.csv
 HR_INFO_FILE=hr-info.csv
 RAW_SW_RESOURCE_ID_FILE=raw-sw-resource-id.txt
 
 #internal config
 TEMP_COUNTRIES_FILE=processed_countries.csv
 TEMP_INDICATORS_FILE=processed_indicators.csv
-TEMP_INDICATORS_META_FILE=processed_indicators-meta.csv
  #set internal field separator to new line so that for will behave as expected
 
 #put processed files into the log folder
 TEMP_COUNTRIES_FILE=$LOG_FOLDER/$TEMP_COUNTRIES_FILE
 TEMP_INDICATORS_FILE=$LOG_FOLDER/$TEMP_INDICATORS_FILE
-TEMP_INDICATORS_META_FILE=$LOG_FOLDER/$TEMP_INDICATORS_META_FILE
 
 #checking if the ckan instance is present
 if [ ! "$CKAN_INSTANCE" ]; then
@@ -42,11 +39,8 @@ fi
 
 #download the latest csv files by exporting them from Google Docs
 wget -q --no-check-certificate -O $COUNTRIES_FILE 'https://docs.google.com/spreadsheet/ccc?key=0AoSjej3U9V6fdHJzcWNreF8tVDNXTlpaeXl3Z3h3WWc&output=csv&usp=drive_web&gid=15'
-wget -q --no-check-certificate -O $INDICATORS_FILE 'https://docs.google.com/spreadsheet/ccc?key=0AoSjej3U9V6fdHJzcWNreF8tVDNXTlpaeXl3Z3h3WWc&output=csv&usp=drive_web&gid=16'
 wget -q --no-check-certificate -O $HR_INFO_FILE 'https://docs.google.com/spreadsheets/d/1cM6TY9D5-Yebz3NK1rJnxhN89DsUCs6S9lL5MmjDCSw/export?format=csv&id=1cM6TY9D5-Yebz3NK1rJnxhN89DsUCs6S9lL5MmjDCSw&gid=0'
-#please enable indicator metadata download when the doc has been made public
-#also make the file move in the log folder after the script finished
-#wget -q --no-check-certificate -O $INDICATORS_META_FILE 'https://docs.google.com/spreadsheet/ccc?key=1IEeexTF_4SJNirYSTuGym1ybKMcigMUGsRrGTuovKlM&output=csv&usp=drive_web&gid=318994838'
+wget -q --no-check-certificate -O $INDICATORS_FILE "http://manage.ochadata.net/hdx/api/exporter/indicatorAllMetadata/csv/language/default/AllIndicatorTypes_metadata.csv"
 
 
 #Test to see if the import files exist
@@ -70,13 +64,6 @@ then
     csv_files_not_found=true
 fi
 
-if [ ! -f "$INDICATORS_META_FILE" ]
-then
-    echo "Indicators Metadata file $INDICATORS_META_FILE does not exists, please get the latest version using this link: "
-    echo "    https://docs.google.com/spreadsheet/ccc?key=1IEeexTF_4SJNirYSTuGym1ybKMcigMUGsRrGTuovKlM&output=csv&usp=drive_web&gid=318994838"
-    csv_files_not_found=true
-fi
-
 if $csv_files_not_found; then
 	exit;
 fi
@@ -93,9 +80,6 @@ tail -n+2 $COUNTRIES_FILE | ./scripts/csv.sh > $TEMP_COUNTRIES_FILE
 echo "Processing indicators csv file"
 #indicators file has 2 header lines will skip them
 tail -n+2 $INDICATORS_FILE | ./scripts/csv.sh | grep "y|" > $TEMP_INDICATORS_FILE
-echo "Processing indicators csv file"
-#indicators file has 1 header line, skipping it
-tail -n+2 $INDICATORS_META_FILE | ./scripts/csv.sh > $TEMP_INDICATORS_META_FILE
 
 echo "Adding organization HDX"
 org_id=hdx
@@ -130,7 +114,7 @@ function add_countries(){
     #add a country tag so that the dataset is searchable, also strip characters that are not letters, numbers, space, minus or dot
     country_tag=`echo $country_name | sed 's/[^A-Za-z0-9 .-]*//g'`
     if [ "$add_tags" ]; then
-      tags="[{\"name\":\""$group_id"\"}, {\"name\":\""$country_tag"\"}, {\"name\":\"baseline\"},{\"name\":\"preparedness\"}]"
+      tags="[{\"name\":\""$group_id"\"}, {\"name\":\"baseline\"},{\"name\":\"preparedness\"}]"
     fi
     . scripts/addPackage.sh
 
@@ -167,17 +151,19 @@ relief_url=   #not using
 geojson=   #not using
 . scripts/addGroup.sh
 
-function add_indicators(){
-  indicator_file_name_ext=$1
-  indicator_url_ext=$2
+function add_new_indicators(){
+  file_name=$1
+  indicator_file_name_ext=$2
+  indicator_url_ext=$3
 
   echo "Adding indicators"
   #Iterate over indicators list
-  cut -d '|' -f2 ${TEMP_INDICATORS_FILE} > ${TEMP_INDICATORS_FILE}.column
-  while read -r indicator;
+  #cut -d '|' -f2 $file_name > $file_name.column
+  while read -r -u9 line;
   do
     #getting indicator metadata
-    indicator_meta=`cat ${TEMP_INDICATORS_META_FILE} | grep "|${indicator}|" | sed "s/\;/ /" | sed "s/\"\"/'/"`
+    indicator_meta=`echo $line | sed "s/\;/ /g" | sed "s/\"/'/g"`
+
     ckan_source=`echo $indicator_meta | cut -d '|' -f5`
     ckan_license=`echo $indicator_meta | cut -d '|' -f14`
     ckan_date_min=`echo $indicator_meta | cut -d '|' -f11`
@@ -190,44 +176,81 @@ function add_indicators(){
     # echo "Caveats:"$ckan_caveats
 
     #convert all upper chars to lower; then convert space into "_"; then remove all characters except a-z,0-9,"-" and "_"; then replace "__" with "_"
+    indicator=`echo $line | cut -d '|' -f2`
     dataset_id=`echo $indicator | tr '[:upper:]' '[:lower:]' | tr ' ' '_' | sed 's/[^a-z0-9_-]*//g' | sed "s/__/_/g" | sed 's:_$::'`
-    dataset_id_ext=`echo $indicator_file_name_ext | tr '[:upper:]' '[:lower:]' | tr ' ' '_'`
-    dataset_id=$dataset_id"_"$dataset_id_ext
-    dataset_name=$indicator
-    dataset_description=""
-    tags='[{"name":"baseline"},{"name":"preparedness"}]'
+    #Theoretically there shouldn't be overlapping indicators from different sources now
+    #dataset_id_ext=`echo $indicator_file_name_ext | tr '[:upper:]' '[:lower:]' | tr ' ' '_'`
+    #dataset_id=$dataset_id"_"$dataset_id_ext
+    dataset_name=`echo $indicator | sed 's/\&/ and /g'`
+    echo "Dataset name:"$dataset_name
+    dataset_description="" #manually placed
+    tags="" #manually placed
     #echo "Inserting indicator with code "$dataset_id" for "$dataset_name""
-    . scripts/addPackage.sh
+   . scripts/addPackage.sh
 
     #preparing to add resources
-    indicator_type=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}|" | cut -d '|' -f3`
+    indicator_type=`echo $line | cut -d '|' -f1`
     echo "Indicator type is:"$indicator_type" and indicator: |"$indicator"|"
-    source_code=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}|" | cut -d '|' -f4`
-
+    source_code=`echo $line | cut -d '|' -f3`
     #Adding resources
-    resource_url="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/xlsx/${indicator_type}/source/${source_code}/fromYear/1950/toYear/2014/language/en/${indicator_type}_baseline.xlsx"
-    resource_name=$indicator_type"_"$indicator_file_name_ext".xlsx"
-    resource_description="Same as dataset description"
-    resource_format="xlsx"
-    . scripts/addResource.sh
 
-    resource_url="${CPS_URL}/api/exporter/indicatorMetadata${indicator_url_ext}/csv/${indicator_type}/language/en/${indicator_type}_baseline.csv"
-    resource_name=$indicator_type"_"$indicator_file_name_ext".csv"
-    resource_description="Same as dataset description"
-    resource_format="csv"
-    . scripts/addResource.sh
-  done < ${TEMP_INDICATORS_FILE}.column
+    # no csv file for now
+    # resource_url="${CPS_URL}/api/exporter/indicatorMetadata${indicator_url_ext}/csv/${indicator_type}/language/en/${indicator_type}_baseline.csv"
+    # resource_name=$indicator_type"_"$indicator_file_name_ext".csv"
+    # resource_description="Same as dataset description"
+    # resource_format="csv"
+    # . scripts/addResource.sh
+
+    #add readme file
+    if [ "$indicator_file_name_ext" == "RW" ]; then
+      #RW
+      xls_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/xlsx"
+      rdm_resource_url_start=""
+    else
+      if [ "$indicator_file_name_ext" == "FTS" ]; then
+        #FTS
+        xls_resource_url_start=""
+        rdm_resource_url_start=""
+      else
+        #SW
+        xls_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/xlsx/${indicator_type}/source/${source_code}"
+        rdm_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/readme/${indicator_type}/source/${source_code}"
+      fi
+    fi
+
+    if [ "$xls_resource_url_start" ]; then
+      resource_url="${xls_resource_url_start}/fromYear/1950/toYear/2014/language/en/${indicator_type}_baseline.xlsx"
+      resource_name=$indicator_type"_"$indicator_file_name_ext".xlsx"
+      resource_description="Same as dataset description"
+      resource_format="xlsx"
+      . scripts/addResource.sh
+    fi
+    if [ "$rdm_resource_url_start" ]; then
+      resource_url="${rdm_resource_url_start}/language/EN/ReadMe.txt"
+      resource_name=$indicator_type"_"$indicator_file_name_ext"_Readme.txt"
+      resource_description="Supporting information for the accompanying CSV file"
+      resource_format="txt"
+      . scripts/addResource.sh
+    fi
+
+  done 9<${file_name}
+
   ckan_source=
   ckan_license=
   ckan_date_min=
   ckan_date_max=
   ckan_methodology=
   ckan_caveats=
+
 }
 
-add_indicators "Baseline" ""
-#add_indicators "RW" "RW"
-#add_indicators "FTS" "FTS"
+cat $TEMP_INDICATORS_FILE | grep "|RW|" > $TEMP_INDICATORS_FILE.rw
+cat $TEMP_INDICATORS_FILE | grep "|fts|" > $TEMP_INDICATORS_FILE.fts
+cat $TEMP_INDICATORS_FILE | grep -v "|RW|\||fts|" > $TEMP_INDICATORS_FILE.other
+
+add_new_indicators "${TEMP_INDICATORS_FILE}.rw" "RW" "RW"
+add_new_indicators "${TEMP_INDICATORS_FILE}.fts" "FTS" "FTS"
+add_new_indicators "${TEMP_INDICATORS_FILE}.other" "Baseline" ""
 
 echo "Adding package Raw ScraperWiki Input"
 dataset_id=raw-scraperwiki-input
