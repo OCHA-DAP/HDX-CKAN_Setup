@@ -37,6 +37,10 @@ if [ "$dataset_description" ]; then
 	extra_json=$extra_json" \"notes\":\"$dataset_description\", "
 fi
 
+if [ "$tags" ]; then
+	extra_json=$extra_json" \"tags\":"$tags", "
+fi
+
 if [ "$ckan_source" ]; then
 	extra_json=$extra_json" \"dataset_source\":\"$ckan_source\", "
 fi
@@ -63,7 +67,6 @@ curl -s $CKAN_INSTANCE/api/3/action/$action \
 				"name":"'"$dataset_id"'",
 				"title":"'"$dataset_name"'",
 				"state":"active",
-				"tags":'"$tags"',
 				"groups":[{"id":"'"$group_id"'"}],
 				"package_creator": "import-script"
 			}' \

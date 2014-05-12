@@ -13,6 +13,7 @@
 LOG_FOLDER=log
 COUNTRIES_FILE=countries.csv
 INDICATORS_FILE=indicators.csv
+INDICATORS_META_FILE=indicators-meta.csv
 HR_INFO_FILE=hr-info.csv
 RAW_SW_RESOURCE_ID_FILE=raw-sw-resource-id.txt
 
@@ -44,6 +45,7 @@ wget -q --no-check-certificate -O $COUNTRIES_FILE 'https://docs.google.com/sprea
 wget -q --no-check-certificate -O $INDICATORS_FILE 'https://docs.google.com/spreadsheet/ccc?key=0AoSjej3U9V6fdHJzcWNreF8tVDNXTlpaeXl3Z3h3WWc&output=csv&usp=drive_web&gid=16'
 wget -q --no-check-certificate -O $HR_INFO_FILE 'https://docs.google.com/spreadsheets/d/1cM6TY9D5-Yebz3NK1rJnxhN89DsUCs6S9lL5MmjDCSw/export?format=csv&id=1cM6TY9D5-Yebz3NK1rJnxhN89DsUCs6S9lL5MmjDCSw&gid=0'
 #please enable indicator metadata download when the doc has been made public
+#also make the file move in the log folder after the script finished
 #wget -q --no-check-certificate -O $INDICATORS_META_FILE 'https://docs.google.com/spreadsheet/ccc?key=1IEeexTF_4SJNirYSTuGym1ybKMcigMUGsRrGTuovKlM&output=csv&usp=drive_web&gid=318994838'
 
 
@@ -100,50 +102,63 @@ org_id=hdx
 org_name=HDX
 . scripts/addOrganization.sh
 
+function add_countries(){
+  country_name_extension=$1
+  dataset_description=$2
+  country_file_name_ext=$3
+  country_url_ext=$4
+  add_tags=$5
 
-echo "Adding countries"
-#Iterate over countries list
-cut -d '|' -f2 ${TEMP_COUNTRIES_FILE} > ${TEMP_COUNTRIES_FILE}.column
-while read -r country;
-do
-	country_name=`cat ${TEMP_COUNTRIES_FILE} | grep "|${country}|" | cut -d '|' -f1`
-	#echo "Inserting category with code "$country" for "$country_name""
-	#convert the group id to lowercase and remove spaces so that CKAN is ok with it
-	group_id=`echo $country | tr '[:upper:]' '[:lower:]' | tr -d ' '`
-	group_name="$country_name"
-	relief_url="http://reliefweb.int/country/"$group_id
-	geojson=$group_id
-	echo "DOING $country_name"
-	. scripts/addGroup.sh
+  echo "Adding countries"
+  #Iterate over countries list
+  cut -d '|' -f2 ${TEMP_COUNTRIES_FILE} > ${TEMP_COUNTRIES_FILE}.column
+  while read -r country;
+  do
+    country_name=`cat ${TEMP_COUNTRIES_FILE} | grep "|${country}|" | cut -d '|' -f1`
+    #echo "Inserting category with code "$country" for "$country_name""
+    #convert the group id to lowercase and remove spaces so that CKAN is ok with it
+    group_id=`echo $country | tr '[:upper:]' '[:lower:]' | tr -d ' '`
+    group_id_ext=`echo $country_name_extension | tr '[:upper:]' '[:lower:]' | tr ' ' '_'`
+    group_name="$country_name"
+    relief_url="http://reliefweb.int/country/"$group_id
+    geojson=$group_id
+    echo "DOING $country_name"
+    . scripts/addGroup.sh
 
-	dataset_id=$group_id"_baseline_data"
-	dataset_name=$country_name" Baseline Data"
-  dataset_description="A compilation of time-series data from a variety of sources reported at the national level. Additional information about the sources is available in the file."
-	#add a country tag so that the dataset is searchable, also strip characters that are not letters, numbers, space, minus or dot
-	country_tag=`echo $country_name | sed 's/[^A-Za-z0-9 .-]*//g'`
-	tags='[{"name":"'"$group_id"'"}, {"name":"'"$country_tag"'"}, {"name":"baseline"},{"name":"preparedness"}]'
-	. scripts/addPackage.sh
+    dataset_id=$group_id"_"$group_id_ext
+    dataset_name=$country_name" "$country_name_extension
+    #add a country tag so that the dataset is searchable, also strip characters that are not letters, numbers, space, minus or dot
+    country_tag=`echo $country_name | sed 's/[^A-Za-z0-9 .-]*//g'`
+    if [ "$add_tags" ]; then
+      tags="[{\"name\":\""$group_id"\"}, {\"name\":\""$country_tag"\"}, {\"name\":\"baseline\"},{\"name\":\"preparedness\"}]"
+    fi
+    . scripts/addPackage.sh
 
-	country_code_upper=`echo $country | tr -d ' '`
-	resource_url="${CPS_URL}/api/exporter/country/xlsx/${country_code_upper}/fromYear/1950/toYear/2014/language/EN/${country_code_upper}_baseline.xlsx"
-	resource_name=$country"_Baseline.xlsx"
-  resource_description="Same as dataset description"
-  resource_format="xlsx"
-	. scripts/addResource.sh
+    country_code_upper=`echo $country | tr -d ' '`
+    resource_url="${CPS_URL}/api/exporter/country${country_url_ext}/xlsx/${country_code_upper}/fromYear/1950/toYear/2014/language/EN/${country_code_upper}_baseline.xlsx"
+    resource_name=$country"_"$country_file_name_ext".xlsx"
+    resource_description="Same as dataset description"
+    resource_format="xlsx"
+    . scripts/addResource.sh
 
-  resource_url="${CPS_URL}/api/exporter/country/csv/${country_code_upper}/fromYear/1950/toYear/2014/language/EN/${country_code_upper}_baseline.csv"
-  resource_name=$country"_Baseline.csv"
-  resource_description="Same as dataset description"
-  resource_format="csv"
-  . scripts/addResource.sh
+    resource_url="${CPS_URL}/api/exporter/country${country_url_ext}/csv/${country_code_upper}/fromYear/1950/toYear/2014/language/EN/${country_code_upper}_baseline.csv"
+    resource_name=$country"_"$country_file_name_ext".csv"
+    resource_description="Same as dataset description"
+    resource_format="csv"
+    . scripts/addResource.sh
 
-  resource_url="${CPS_URL}/api/exporter/country/readme/${country_code_upper}/language/EN/ReadMe.txt"
-  resource_name=$country"_Readme.txt"
-  resource_description="Supporting information for the accompanying CSV file"
-  resource_format="txt"
-  . scripts/addResource.sh
+    resource_url="${CPS_URL}/api/exporter/country${country_url_ext}/readme/${country_code_upper}/language/EN/ReadMe.txt"
+    resource_name=$country"_Readme.txt"
+    resource_description="Supporting information for the accompanying CSV file"
+    resource_format="txt"
+    . scripts/addResource.sh
 
-done < ${TEMP_COUNTRIES_FILE}.column
+  done < ${TEMP_COUNTRIES_FILE}.column
+  tags=
+}
+add_countries "Baseline Data" "A compilation of time-series data from a variety of sources reported at the national level. Additional information about the sources is available in the file." "Baseline" "" "yes"
+add_countries "RW indicators" "ReliefWeb indicators reported at the national level." "RW" "RW" ""
+#add_countries "FTS indicators" "Selected indicators from the Financial Tracking System reported at the national level. " "FTS" "FTS" ''
 
 #Create group for indicators
 group_id=world
@@ -152,56 +167,67 @@ relief_url=   #not using
 geojson=   #not using
 . scripts/addGroup.sh
 
-echo "Adding indicators"
-#Iterate over indicators list
-cut -d '|' -f2 ${TEMP_INDICATORS_FILE} > ${TEMP_INDICATORS_FILE}.column
-while read -r indicator;
-do
-  #getting indicator metadata
-  indicator_meta=`cat ${TEMP_INDICATORS_META_FILE} | grep "|${indicator}|" | sed "s/\;/ /" | sed "s/\"\"/'/"`
-  ckan_source=`echo $indicator_meta | cut -d '|' -f5`
-  ckan_license=`echo $indicator_meta | cut -d '|' -f14`
-  ckan_date_min=`echo $indicator_meta | cut -d '|' -f11`
-  ckan_date_max=`echo $indicator_meta | cut -d '|' -f12`
-  ckan_methodology="`echo $indicator_meta | cut -d '|' -f10`"
-  ckan_caveats=`echo $indicator_meta | cut -d '|' -f13`
-  # echo "Row: "$indicator_meta
-  # echo "Source:"$ckan_source
-  # echo "Meth:"$ckan_methodology
-  # echo "Caveats:"$ckan_caveats
+function add_indicators(){
+  indicator_file_name_ext=$1
+  indicator_url_ext=$2
 
-	#convert all upper chars to lower; then convert space into "_"; then remove all characters except a-z,0-9,"-" and "_"; then replace "__" with "_"
-	dataset_id=`echo $indicator | tr '[:upper:]' '[:lower:]' | tr ' ' '_' | sed 's/[^a-z0-9_-]*//g' | sed "s/__/_/g" | sed 's:_$::'`
-	dataset_name=$indicator
-  dataset_description=""
-	tags='[{"name":"baseline"},{"name":"preparedness"}]'
-	#echo "Inserting indicator with code "$dataset_id" for "$dataset_name""
-	. scripts/addPackage.sh
+  echo "Adding indicators"
+  #Iterate over indicators list
+  cut -d '|' -f2 ${TEMP_INDICATORS_FILE} > ${TEMP_INDICATORS_FILE}.column
+  while read -r indicator;
+  do
+    #getting indicator metadata
+    indicator_meta=`cat ${TEMP_INDICATORS_META_FILE} | grep "|${indicator}|" | sed "s/\;/ /" | sed "s/\"\"/'/"`
+    ckan_source=`echo $indicator_meta | cut -d '|' -f5`
+    ckan_license=`echo $indicator_meta | cut -d '|' -f14`
+    ckan_date_min=`echo $indicator_meta | cut -d '|' -f11`
+    ckan_date_max=`echo $indicator_meta | cut -d '|' -f12`
+    ckan_methodology="`echo $indicator_meta | cut -d '|' -f10`"
+    ckan_caveats=`echo $indicator_meta | cut -d '|' -f13`
+    # echo "Row: "$indicator_meta
+    # echo "Source:"$ckan_source
+    # echo "Meth:"$ckan_methodology
+    # echo "Caveats:"$ckan_caveats
 
-  #preparing to add resources
-	indicator_type=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}|" | cut -d '|' -f3`
-  echo "Indicator type is:"$indicator_type" and indicator: |"$indicator"|"
-	source_code=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}|" | cut -d '|' -f4`
+    #convert all upper chars to lower; then convert space into "_"; then remove all characters except a-z,0-9,"-" and "_"; then replace "__" with "_"
+    dataset_id=`echo $indicator | tr '[:upper:]' '[:lower:]' | tr ' ' '_' | sed 's/[^a-z0-9_-]*//g' | sed "s/__/_/g" | sed 's:_$::'`
+    dataset_id_ext=`echo $indicator_file_name_ext | tr '[:upper:]' '[:lower:]' | tr ' ' '_'`
+    dataset_id=$dataset_id"_"$dataset_id_ext
+    dataset_name=$indicator
+    dataset_description=""
+    tags='[{"name":"baseline"},{"name":"preparedness"}]'
+    #echo "Inserting indicator with code "$dataset_id" for "$dataset_name""
+    . scripts/addPackage.sh
 
-  #Adding resources
-	resource_url="${CPS_URL}/api/exporter/indicator/xlsx/${indicator_type}/source/${source_code}/fromYear/1950/toYear/2014/language/en/${indicator_type}_baseline.xlsx"
-	resource_name=$indicator_type"_Baseline.xlsx"
-  resource_description="Same as dataset description"
-  resource_format="xlsx"
-	. scripts/addResource.sh
+    #preparing to add resources
+    indicator_type=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}|" | cut -d '|' -f3`
+    echo "Indicator type is:"$indicator_type" and indicator: |"$indicator"|"
+    source_code=`cat ${TEMP_INDICATORS_FILE} | grep "|${indicator}|" | cut -d '|' -f4`
 
-  resource_url="${CPS_URL}/api/exporter/indicatorMetadata/csv/${indicator_type}/language/en/${indicator_type}_baseline.csv"
-  resource_name=$indicator_type"_Baseline.csv"
-  resource_description="Same as dataset description"
-  resource_format="csv"
-  . scripts/addResource.sh
-done < ${TEMP_INDICATORS_FILE}.column
-ckan_source=
-ckan_license=
-ckan_date_min=
-ckan_date_max=
-ckan_methodology=
-ckan_caveats=
+    #Adding resources
+    resource_url="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/xlsx/${indicator_type}/source/${source_code}/fromYear/1950/toYear/2014/language/en/${indicator_type}_baseline.xlsx"
+    resource_name=$indicator_type"_"$indicator_file_name_ext".xlsx"
+    resource_description="Same as dataset description"
+    resource_format="xlsx"
+    . scripts/addResource.sh
+
+    resource_url="${CPS_URL}/api/exporter/indicatorMetadata${indicator_url_ext}/csv/${indicator_type}/language/en/${indicator_type}_baseline.csv"
+    resource_name=$indicator_type"_"$indicator_file_name_ext".csv"
+    resource_description="Same as dataset description"
+    resource_format="csv"
+    . scripts/addResource.sh
+  done < ${TEMP_INDICATORS_FILE}.column
+  ckan_source=
+  ckan_license=
+  ckan_date_min=
+  ckan_date_max=
+  ckan_methodology=
+  ckan_caveats=
+}
+
+add_indicators "Baseline" ""
+#add_indicators "RW" "RW"
+#add_indicators "FTS" "FTS"
 
 echo "Adding package Raw ScraperWiki Input"
 dataset_id=raw-scraperwiki-input
