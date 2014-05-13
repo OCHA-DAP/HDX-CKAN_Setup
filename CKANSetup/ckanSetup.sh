@@ -142,7 +142,7 @@ function add_countries(){
 }
 add_countries "Baseline Data" "A compilation of time-series data from a variety of sources reported at the national level. Additional information about the sources is available in the file." "Baseline" "" "yes"
 add_countries "RW indicators" "ReliefWeb indicators reported at the national level." "RW" "RW" ""
-#add_countries "FTS indicators" "Selected indicators from the Financial Tracking System reported at the national level. " "FTS" "FTS" ''
+add_countries "FTS indicators" "Selected indicators from the Financial Tracking System reported at the national level." "FTS" "FTS" ''
 
 #Create group for indicators
 group_id=world
@@ -205,16 +205,26 @@ function add_new_indicators(){
     if [ "$indicator_file_name_ext" == "RW" ]; then
       #RW
       xls_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/xlsx"
-      rdm_resource_url_start=""
+      csv_resource_url_start=""
+      rdm_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/readme"
     else
       if [ "$indicator_file_name_ext" == "FTS" ]; then
         #FTS
-        xls_resource_url_start=""
-        rdm_resource_url_start=""
+        xls_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/xlsx"
+        csv_resource_url_start=""
+        rdm_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/readme"
       else
-        #SW
-        xls_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/xlsx/${indicator_type}/source/${source_code}"
-        rdm_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/readme/${indicator_type}/source/${source_code}"
+        if [ "$indicator_file_name_ext" == "UNHCR" ]; then
+          #UNHCR
+          xls_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/xlsx"
+          csv_resource_url_start=""
+          rdm_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/readme"
+        else
+          #SW
+          xls_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/xlsx/${indicator_type}/source/${source_code}"
+          csv_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/csv/${indicator_type}/source/${source_code}"
+          rdm_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/readme/${indicator_type}/source/${source_code}"
+        fi
       fi
     fi
 
@@ -223,6 +233,13 @@ function add_new_indicators(){
       resource_name=$indicator_type"_"$indicator_file_name_ext".xlsx"
       resource_description="Same as dataset description"
       resource_format="xlsx"
+      . scripts/addResource.sh
+    fi
+    if [ "$csv_resource_url_start" ]; then
+      resource_url="${csv_resource_url_start}/fromYear/1950/toYear/2014/language/en/${indicator_type}_baseline.csv"
+      resource_name=$indicator_type"_"$indicator_file_name_ext".csv"
+      resource_description="Same as dataset description"
+      resource_format="csv"
       . scripts/addResource.sh
     fi
     if [ "$rdm_resource_url_start" ]; then
