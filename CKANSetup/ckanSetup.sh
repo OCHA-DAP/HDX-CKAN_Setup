@@ -93,7 +93,7 @@ function add_countries(){
   country_url_ext=$4
   add_tags=$5
 
-  ckan_source=$country_file_name_ext
+  ckan_source="Multiple Sources"
 
   echo "Adding countries"
   #Iterate over countries list
@@ -141,6 +141,7 @@ function add_countries(){
 
   done < ${TEMP_COUNTRIES_FILE}.column
   tags=
+  ckan_source=
 }
 add_countries "Baseline Data" "A compilation of time-series data from a variety of sources reported at the national level. Additional information about the sources is available in the file." "Baseline" "" "yes"
 add_countries "RW indicators" "ReliefWeb indicators reported at the national level." "RW" "RW" ""
