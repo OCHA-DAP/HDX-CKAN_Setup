@@ -40,7 +40,7 @@ fi
 #download the latest csv files by exporting them from Google Docs
 wget -q --no-check-certificate -O $COUNTRIES_FILE 'https://docs.google.com/spreadsheet/ccc?key=0AoSjej3U9V6fdHJzcWNreF8tVDNXTlpaeXl3Z3h3WWc&output=csv&usp=drive_web&gid=15'
 wget -q --no-check-certificate -O $HR_INFO_FILE 'https://docs.google.com/spreadsheets/d/1cM6TY9D5-Yebz3NK1rJnxhN89DsUCs6S9lL5MmjDCSw/export?format=csv&id=1cM6TY9D5-Yebz3NK1rJnxhN89DsUCs6S9lL5MmjDCSw&gid=0'
-wget -q --no-check-certificate -O $INDICATORS_FILE "http://manage.ochadata.net/hdx/api/exporter/indicatorAllMetadata/csv/language/default/AllIndicatorTypes_metadata.csv"
+wget -q --no-check-certificate -O $INDICATORS_FILE "http://test-manage.hdx.rwlabs.org/hdx/api/exporter/indicatorAllMetadata/csv/language/default/AllIndicatorTypes_metadata.csv"
 
 
 #Test to see if the import files exist
@@ -92,6 +92,8 @@ function add_countries(){
   country_file_name_ext=$3
   country_url_ext=$4
   add_tags=$5
+
+  ckan_source=$country_file_name_ext
 
   echo "Adding countries"
   #Iterate over countries list
