@@ -16,6 +16,8 @@ INDICATORS_FILE=indicators.csv
 HR_INFO_FILE=hr-info.csv
 RAW_SW_RESOURCE_ID_FILE=raw-sw-resource-id.txt
 
+. ckanSetup.cfg
+
 #internal config
 TEMP_COUNTRIES_FILE=processed_countries.csv
 TEMP_INDICATORS_FILE=processed_indicators.csv
