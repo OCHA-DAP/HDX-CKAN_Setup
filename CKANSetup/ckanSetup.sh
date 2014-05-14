@@ -123,20 +123,21 @@ function add_countries(){
     . scripts/addPackage.sh
 
     country_code_upper=`echo $country | tr -d ' '`
-    resource_url="${CPS_URL}/api/exporter/country${country_url_ext}/xlsx/${country_code_upper}/fromYear/1950/toYear/2014/language/EN/${country_code_upper}_baseline.xlsx"
+
     resource_name=$country"_"$country_file_name_ext".xlsx"
+    resource_url="${CPS_URL}/api/exporter/country${country_url_ext}/xlsx/${country_code_upper}/fromYear/1950/toYear/2014/language/EN/${resource_name}"
     resource_description="Same as dataset description"
     resource_format="xlsx"
     . scripts/addResource.sh
 
-    resource_url="${CPS_URL}/api/exporter/country${country_url_ext}/csv/${country_code_upper}/fromYear/1950/toYear/2014/language/EN/${country_code_upper}_baseline.csv"
     resource_name=$country"_"$country_file_name_ext".csv"
+    resource_url="${CPS_URL}/api/exporter/country${country_url_ext}/csv/${country_code_upper}/fromYear/1950/toYear/2014/language/EN/${resource_name}"
     resource_description="Same as dataset description"
     resource_format="csv"
     . scripts/addResource.sh
 
-    resource_url="${CPS_URL}/api/exporter/country${country_url_ext}/readme/${country_code_upper}/language/EN/ReadMe.txt"
     resource_name=$country"_Readme.txt"
+    resource_url="${CPS_URL}/api/exporter/country${country_url_ext}/readme/${country_code_upper}/language/EN/ReadMe.txt"
     resource_description="Supporting information for the accompanying CSV file"
     resource_format="txt"
     . scripts/addResource.sh
@@ -145,7 +146,7 @@ function add_countries(){
   tags=
   ckan_source=
 }
-add_countries "Baseline Data" "A compilation of time-series data from a variety of sources reported at the national level. Additional information about the sources is available in the file." "Baseline" "" "yes"
+#add_countries "Baseline Data" "A compilation of time-series data from a variety of sources reported at the national level. Additional information about the sources is available in the file." "Baseline" "" "yes"
 add_countries "RW indicators" "ReliefWeb indicators reported at the national level." "RW" "RW" ""
 add_countries "FTS indicators" "Selected indicators from the Financial Tracking System reported at the national level." "FTS" "FTS" ''
 
