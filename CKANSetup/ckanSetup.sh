@@ -146,7 +146,7 @@ function add_countries(){
   tags=
   ckan_source=
 }
-#add_countries "Baseline Data" "A compilation of time-series data from a variety of sources reported at the national level. Additional information about the sources is available in the file." "Baseline" "" "yes"
+add_countries "Baseline Data" "A compilation of time-series data from a variety of sources reported at the national level. Additional information about the sources is available in the file." "Baseline" "" "yes"
 add_countries "RW indicators" "ReliefWeb indicators reported at the national level." "RW" "RW" ""
 add_countries "FTS indicators" "Selected indicators from the Financial Tracking System reported at the national level." "FTS" "FTS" ''
 
