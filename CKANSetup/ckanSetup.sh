@@ -147,7 +147,7 @@ function add_countries(){
   ckan_source=
 }
 add_countries "Baseline Data" "A compilation of time-series data from a variety of sources reported at the national level. Additional information about the sources is available in the file." "Baseline" "" "yes"
-add_countries "RW indicators" "ReliefWeb indicators reported at the national level." "RW" "RW" ""
+add_countries "RW indicators" "ReliefWeb indicators reported at the national level." "RW" "RW" ''
 add_countries "FTS indicators" "Selected indicators from the Financial Tracking System reported at the national level." "FTS" "FTS" ''
 
 #Create group for indicators
@@ -235,15 +235,15 @@ function add_new_indicators(){
     fi
 
     if [ "$xls_resource_url_start" ]; then
-      resource_url="${xls_resource_url_start}/fromYear/1950/toYear/2014/language/en/${indicator_type}_baseline.xlsx"
       resource_name=$indicator_type"_"$indicator_file_name_ext".xlsx"
+      resource_url="${xls_resource_url_start}/fromYear/1950/toYear/2014/language/en/${resource_name}"
       resource_description="Same as dataset description"
       resource_format="xlsx"
       . scripts/addResource.sh
     fi
     if [ "$csv_resource_url_start" ]; then
-      resource_url="${csv_resource_url_start}/fromYear/1950/toYear/2014/language/en/${indicator_type}_baseline.csv"
       resource_name=$indicator_type"_"$indicator_file_name_ext".csv"
+      resource_url="${csv_resource_url_start}/fromYear/1950/toYear/2014/language/en/${resource_name}"
       resource_description="Same as dataset description"
       resource_format="csv"
       . scripts/addResource.sh
