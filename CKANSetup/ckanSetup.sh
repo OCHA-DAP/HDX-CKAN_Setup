@@ -81,7 +81,7 @@ echo "Processing countries csv file"
 tail -n+2 $COUNTRIES_FILE | ./scripts/csv.sh > $TEMP_COUNTRIES_FILE
 echo "Processing indicators csv file"
 #indicators file has 2 header lines will skip them
-tail -n+2 $INDICATORS_FILE | ./scripts/csv.sh | grep "y|" > $TEMP_INDICATORS_FILE
+tail -n+2 $INDICATORS_FILE | ./scripts/csv.sh > $TEMP_INDICATORS_FILE
 
 echo "Adding organization HDX"
 org_id=hdx
