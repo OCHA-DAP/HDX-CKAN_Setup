@@ -143,7 +143,7 @@ function add_countries(){
     . scripts/addResource.sh
 
     resource_name=$country"_Readme.txt"
-    resource_url="${CPS_URL}/api/exporter/country${country_url_ext}/readme/${country_code_upper}/language/EN/ReadMe.txt"
+    resource_url="${CPS_URL}/api/exporter/country${country_url_ext}/readme/${country_code_upper}/language/EN/${resource_name}"
     resource_description="Supporting information for the accompanying CSV file"
     resource_format="txt"
     . scripts/addResource.sh
