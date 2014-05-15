@@ -21,7 +21,7 @@ RAW_SW_RESOURCE_ID_FILE=raw-sw-resource-id.txt
 #internal config
 TEMP_COUNTRIES_FILE=processed_countries.csv
 TEMP_INDICATORS_FILE=processed_indicators.csv
- #set internal field separator to new line so that for will behave as expected
+#set internal field separator to new line so that for will behave as expected
 
 #put processed files into the log folder
 TEMP_COUNTRIES_FILE=$LOG_FOLDER/$TEMP_COUNTRIES_FILE
@@ -107,6 +107,12 @@ function add_countries(){
     #convert the group id to lowercase and remove spaces so that CKAN is ok with it
     group_id=`echo $country | tr '[:upper:]' '[:lower:]' | tr -d ' '`
     group_id_ext=`echo $country_name_extension | tr '[:upper:]' '[:lower:]' | tr ' ' '_'`
+    if [ "$country_file_name_ext" == "Baseline" ]; then
+      group_update="true"
+    else
+      group_update="false"
+    fi
+
     group_name="$country_name"
     relief_url="http://reliefweb.int/country/"$group_id
     geojson=$group_id
@@ -146,6 +152,8 @@ function add_countries(){
   tags=
   ckan_source=
 }
+
+#DON'T Change order - Group update will happen just for the first run since it will override existing datasets if it's run afterwards!
 add_countries "Baseline Data" "A compilation of time-series data from a variety of sources reported at the national level. Additional information about the sources is available in the file." "Baseline" "" "yes"
 add_countries "RW indicators" "ReliefWeb indicators reported at the national level." "RW" "RW" ''
 add_countries "FTS indicators" "Selected indicators from the Financial Tracking System reported at the national level." "FTS" "FTS" ''
@@ -250,7 +258,7 @@ function add_new_indicators(){
     fi
     if [ "$rdm_resource_url_start" ]; then
       resource_url="${rdm_resource_url_start}/language/EN/ReadMe.txt"
-      resource_name=$indicator_type"_"$indicator_file_name_ext"_Readme.txt"
+      resource_name=$indicator_type"_Readme.txt"
       resource_description="Supporting information for the accompanying CSV file"
       resource_format="txt"
       . scripts/addResource.sh

@@ -5,6 +5,7 @@
 #group_name=Afghanistan
 #relief_url=http://reliefweb.int/country/afg #(optional)
 #geojson=afg #(optional)
+#group_update=   #true should be just for the first dataset added to this group
 #"extras":[ {"key":"geojson","value":"blah"}, {"key":"hr_info_url", "value":"whatever"}]
 #error string that's used to check for errors
 ERROR_GREP="\"success\": false\|Bad request - JSON Error"
@@ -28,7 +29,7 @@ if [ "$geojson" ]; then
     action=geojson #just for log name
     action_file=$LOG_FOLDER/tmp_$action.$group_id.log
     curl -s -H "Content-Type: application/json" https://exversion.com/api/v1/dataset \
-	    --data '{	
+	    --data '{
 		"key":"dbc50657c7",
 		"merge":1,
 		"query": [{"dataset":"AGMCAZMGC6UF916", "params":{"id":"'$geojson'"}}],
@@ -61,24 +62,30 @@ action_file=$LOG_FOLDER/tmp_$action.$group_id.log
 python scripts/aG.py "$CKAN_INSTANCE" "$CKAN_APIKEY" "$action" "$group_id"
 
 if [ $? -eq 0 ]; then
-    echo "Group "$group_id" exists! Updating ..."
+    if [ "$group_update" == "true" ]; then
+      echo "Group "$group_id" exists! Updating ..."
+    else
+      echo "Group "$group_id" exists! Not doing anything!"
+    fi
     action=group_update
 else
     echo "Creating group "$group_id"..."
     action=group_create
 fi
 
-python scripts/aG.py "$CKAN_INSTANCE" "$CKAN_APIKEY" "$action" "$group_id" "$group_name" "$PY_rw_url" "$PY_hr_url" "$PY_geojson"
+if [ "$action" == "group_create" ] || [ "$group_update" == "true" ]; then
+  python scripts/aG.py "$CKAN_INSTANCE" "$CKAN_APIKEY" "$action" "$group_id" "$group_name" "$PY_rw_url" "$PY_hr_url" "$PY_geojson"
 
-if [ $? -ne 0 ]; then
-    echo "Failure."
-else
-    echo "Completed successfully."
-fi
+  if [ $? -ne 0 ]; then
+      echo "Failure."
+  else
+      echo "Completed successfully."
+  fi
 
-if [ -f $action_file ]; then
-    result=`cat $action_file | grep "$ERROR_GREP"`
-    if [ "$result" ]; then
-        echo "<<<ERROR while executing action "$action" on group "$group_id" with name: "$group_name
-    fi    
+  if [ -f $action_file ]; then
+      result=`cat $action_file | grep "$ERROR_GREP"`
+      if [ "$result" ]; then
+          echo "<<<ERROR while executing action "$action" on group "$group_id" with name: "$group_name
+      fi
+  fi
 fi
