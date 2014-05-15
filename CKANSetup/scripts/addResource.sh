@@ -26,9 +26,7 @@ function urlencode() {
 
 
 #No need to check if resource exits, will be deleted by ckan on update
-echo "Url before: "$resource_url
 escaped_url=`urlencode "$resource_url"`
-echo "Url after: "$escaped_url
 
 #create resource
 action=resource_create

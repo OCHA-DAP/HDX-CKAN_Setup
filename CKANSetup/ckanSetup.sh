@@ -96,6 +96,7 @@ function add_countries(){
   add_tags=$5
 
   ckan_source="Multiple Sources"
+	ckan_methodology=$6
 
   echo "Adding countries"
   #Iterate over countries list
@@ -154,9 +155,9 @@ function add_countries(){
 }
 
 #DON'T Change order - Group update will happen just for the first run since it will override existing datasets if it's run afterwards!
-add_countries "Baseline Data" "A compilation of time-series data from a variety of sources reported at the national level. Additional information about the sources is available in the file." "Baseline" "" "yes"
-add_countries "RW indicators" "ReliefWeb indicators reported at the national level." "RW" "RW" ''
-add_countries "FTS indicators" "Selected indicators from the Financial Tracking System reported at the national level." "FTS" "FTS" ''
+add_countries "Baseline Data" "A compilation of time-series data from a variety of sources reported at the national level. Additional information about the sources is available in the file." "Baseline" "" "yes" "Other : Varies, see files"
+add_countries "RW indicators" "ReliefWeb indicators reported at the national level." "RW" "RW" '' "The indicators in this dataset were built from data extracted from the ReliefWeb API"
+add_countries "FTS indicators" "Selected indicators from the Financial Tracking System reported at the national level." "FTS" "FTS" '' "The indicators in this dataset were built from data provided by the Financial Tracking Service (FTS) run by UNOCHA. FTS compiles the funding data based on information that is self-reported by donors and receiving organizations."
 
 #Create group for indicators
 group_id=world
