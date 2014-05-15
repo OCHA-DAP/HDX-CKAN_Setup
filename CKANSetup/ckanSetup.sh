@@ -257,8 +257,8 @@ function add_new_indicators(){
       . scripts/addResource.sh
     fi
     if [ "$rdm_resource_url_start" ]; then
-      resource_url="${rdm_resource_url_start}/language/EN/ReadMe.txt"
-      resource_name=$indicator_type"_Readme.txt"
+			resource_name=$indicator_type"_Readme.txt"
+      resource_url="${rdm_resource_url_start}/language/EN/${resource_name}"
       resource_description="Supporting information for the accompanying CSV file"
       resource_format="txt"
       . scripts/addResource.sh
