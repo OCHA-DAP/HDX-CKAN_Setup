@@ -15,17 +15,20 @@ COUNTRIES_FILE=countries.csv
 INDICATORS_FILE=indicators.csv
 HR_INFO_FILE=hr-info.csv
 RAW_SW_RESOURCE_ID_FILE=raw-sw-resource-id.txt
+TAGS_FILE=tags.csv
 
 . ckanSetup.cfg
 
 #internal config
 TEMP_COUNTRIES_FILE=processed_countries.csv
 TEMP_INDICATORS_FILE=processed_indicators.csv
+TEMP_TAGS_FILE=processed_tags.csv
 #set internal field separator to new line so that for will behave as expected
 
 #put processed files into the log folder
 TEMP_COUNTRIES_FILE=$LOG_FOLDER/$TEMP_COUNTRIES_FILE
 TEMP_INDICATORS_FILE=$LOG_FOLDER/$TEMP_INDICATORS_FILE
+TEMP_TAGS_FILE=$LOG_FOLDER/$TEMP_TAGS_FILE
 
 #checking if the ckan instance is present
 if [ ! "$CKAN_INSTANCE" ]; then
@@ -43,7 +46,7 @@ fi
 wget -q --no-check-certificate -O $COUNTRIES_FILE 'https://docs.google.com/spreadsheet/ccc?key=0AoSjej3U9V6fdHJzcWNreF8tVDNXTlpaeXl3Z3h3WWc&output=csv&usp=drive_web&gid=15'
 wget -q --no-check-certificate -O $HR_INFO_FILE 'https://docs.google.com/spreadsheets/d/1cM6TY9D5-Yebz3NK1rJnxhN89DsUCs6S9lL5MmjDCSw/export?format=csv&id=1cM6TY9D5-Yebz3NK1rJnxhN89DsUCs6S9lL5MmjDCSw&gid=0'
 wget -q --no-check-certificate -O $INDICATORS_FILE "${CPS_URL}/api/exporter/indicatorAllMetadata/csv/language/default/AllIndicatorTypes_metadata.csv"
-
+wget -q --no-check-certificate -O $TAGS_FILE 'https://docs.google.com/spreadsheets/d/10ELuV0fIDdeP5jN41Qb-AH9vfuQLvdI8JRXoMyOKvGQ/export?format=csv&id=10ELuV0fIDdeP5jN41Qb-AH9vfuQLvdI8JRXoMyOKvGQ&pli=1&gid=1656698619'
 
 #Test to see if the import files exist
 csv_files_not_found=false
@@ -65,6 +68,13 @@ then
     echo "    https://docs.google.com/feeds/download/spreadsheets/Export?key=1cM6TY9D5-Yebz3NK1rJnxhN89DsUCs6S9lL5MmjDCSw&usp=sharing&gid=0&exportFormat=csv"
     csv_files_not_found=true
 fi
+if [ ! -f "$TAGS_FILE" ]
+then
+		echo "Tags file $TAG_FILE does not exists, please get the latest version using this link: "
+		echo "    https://docs.google.com/spreadsheets/d/10ELuV0fIDdeP5jN41Qb-AH9vfuQLvdI8JRXoMyOKvGQ/edit#gid=1656698619"
+		csv_files_not_found=true
+fi
+
 
 if $csv_files_not_found; then
 	exit;
@@ -82,6 +92,8 @@ tail -n+2 $COUNTRIES_FILE | ./scripts/csv.sh > $TEMP_COUNTRIES_FILE
 echo "Processing indicators csv file"
 #indicators file has 2 header lines will skip them
 tail -n+2 $INDICATORS_FILE | ./scripts/csv.sh > $TEMP_INDICATORS_FILE
+
+tail -n+2 $TAGS_FILE | ./scripts/csv.sh > $TEMP_TAGS_FILE
 
 echo "Adding organization HDX"
 org_id=hdx
@@ -138,6 +150,11 @@ function add_countries(){
 			ckan_source="OCHA"
 			ckan_license_id="hdx-other"
 		fi
+		tags=`cat $TEMP_TAGS_FILE | grep "$dataset_id|" | cut -d '|' -f3`
+		tags_end=${#tags}
+		tags_end=$[tags_end-2]
+		tags=${tags:1:$tags_end}
+		echo "Tags for $dataset_id: $tags^^^"
     . scripts/addPackage.sh
 
     country_code_upper=`echo $country | tr -d ' '`
@@ -220,6 +237,11 @@ function add_new_indicators(){
 		if [ "$indicator_file_name_ext" == "FTS" ]; then
 			tags="[{\"name\":\"humanitarian finance\"}, {\"name\":\"fts\"}]"
 		fi
+		tags=`cat $TEMP_TAGS_FILE | grep "$dataset_id|" | cut -d '|' -f3`
+		tags_end=${#tags}
+		tags_end=$[tags_end-2]
+		tags=${tags:1:$tags_end}
+		echo "Tags for $dataset_id: $tags^^^"
 
     #echo "Inserting indicator with code "$dataset_id" for "$dataset_name""
    . scripts/addPackage.sh
