@@ -47,7 +47,7 @@ else
 	existing_tags=`echo ${existing_tags}`
 	echo "Existing tags:"$existing_tags
 	tags=$existing_tags
-	
+
 	extra_json=$extra_json" \"tags\":"$tags", "
 fi
 
@@ -56,8 +56,9 @@ if [ "$ckan_source" ]; then
 	extra_json=$extra_json" \"dataset_source\":\"$ckan_source\", "
 fi
 
-# if [ "$ckan_license" ]; then
-# fi
+if [ "$ckan_license_id" ]; then
+	extra_json=$extra_json" \"license_id\":\"$ckan_license_id\", "
+fi
 #
 # if [ "$ckan_date" ]; then
 # fi

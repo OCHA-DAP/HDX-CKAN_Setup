@@ -95,7 +95,6 @@ function add_countries(){
   country_url_ext=$4
   add_tags=$5
 
-  ckan_source="Multiple Sources"
 	ckan_methodology=$6
 
   echo "Adding countries"
@@ -126,12 +125,18 @@ function add_countries(){
     country_tag=`echo $country_name | sed 's/[^A-Za-z0-9 .-]*//g'`
     if [ "$add_tags" == "Baseline" ]; then
       tags="[{\"name\":\""$group_id"\"}, {\"name\":\"baseline\"},{\"name\":\"preparedness\"}]"
+			ckan_source="Multiple Sources"
+			ckan_license_id="hdx-other"
     fi
 		if [ "$add_tags" == "RW" ]; then
 			tags="[{\"name\":\""$group_id"\"}, {\"name\":\"RW\"},{\"name\":\"reports\"},{\"name\":\"disaster\"}]"
+			ckan_source="ReliefWeb"
+			ckan_license_id="other-pd-nr"
 		fi
 		if [ "$add_tags" == "FTS" ]; then
 			tags="[{\"name\":\""$group_id"\"}, {\"name\":\"humanitarian finance\"}]"
+			ckan_source="OCHA"
+			ckan_license_id="hdx-other"
 		fi
     . scripts/addPackage.sh
 
@@ -186,6 +191,7 @@ function add_new_indicators(){
     indicator_meta=`echo $line | sed "s/\;/ /g" | sed "s/\"/'/g"`
     ckan_source=`echo $indicator_meta | cut -d '|' -f6`
     ckan_license=`echo $indicator_meta | cut -d '|' -f14`
+		ckan_license_id="hdx-other"
     ckan_date_min=`echo $indicator_meta | cut -d '|' -f11`
     ckan_date_max=`echo $indicator_meta | cut -d '|' -f12`
     ckan_methodology="`echo $indicator_meta | cut -d '|' -f10`"
@@ -208,6 +214,7 @@ function add_new_indicators(){
 			tags="" #manually placed
 		fi
 		if [ "$indicator_file_name_ext" == "RW" ]; then
+			ckan_source="ReliefWeb"
 			tags="[{\"name\":\"RW\"}]"
 		fi
 		if [ "$indicator_file_name_ext" == "FTS" ]; then
@@ -234,13 +241,13 @@ function add_new_indicators(){
     if [ "$indicator_file_name_ext" == "RW" ]; then
       #RW
       xls_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/xlsx"
-      csv_resource_url_start=""
+			csv_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/csv"
       rdm_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/readme"
     else
       if [ "$indicator_file_name_ext" == "FTS" ]; then
         #FTS
         xls_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/xlsx"
-        csv_resource_url_start=""
+				csv_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/csv"
         rdm_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/readme"
       else
         if [ "$indicator_file_name_ext" == "UNHCR" ]; then
