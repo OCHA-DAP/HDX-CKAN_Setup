@@ -37,8 +37,7 @@ curl -s $CKAN_INSTANCE/api/3/action/$action \
 				"url":"'"$escaped_url"'",
 				"name":"'"$resource_name"'",
 				"format":"'"$resource_format"'",
-				"description":"'"$resource_description"'",
-				"id":"'"$resource_name"'"
+				"description":"'"$resource_description"'"
 			}' \
 	-H Authorization:$CKAN_APIKEY > $action_file
 result=`cat $action_file | grep "$ERROR_GREP"`
