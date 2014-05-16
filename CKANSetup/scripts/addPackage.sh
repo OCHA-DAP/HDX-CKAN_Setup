@@ -8,6 +8,7 @@
 #group_id=AFG
 #org_id=hdx   #optional
 
+
 #error string that's used to check for errors
 ERROR_GREP="\"success\": false\|Bad request - JSON Error"
 
@@ -39,7 +40,17 @@ fi
 
 if [ "$tags" ]; then
 	extra_json=$extra_json" \"tags\":"$tags", "
+else
+	#keep existing tags:
+	existing_tags=`cat $action_file | ./json/JSON.sh/JSON.sh | egrep '\["result","tags"]'`
+	existing_tags=${existing_tags:18}
+	existing_tags=`echo ${existing_tags}`
+	echo "Existing tags:"$existing_tags
+	tags=$existing_tags
+	
+	extra_json=$extra_json" \"tags\":"$tags", "
 fi
+
 
 if [ "$ckan_source" ]; then
 	extra_json=$extra_json" \"dataset_source\":\"$ckan_source\", "
