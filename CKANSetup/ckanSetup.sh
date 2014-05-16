@@ -124,9 +124,15 @@ function add_countries(){
     dataset_name=$country_name" "$country_name_extension
     #add a country tag so that the dataset is searchable, also strip characters that are not letters, numbers, space, minus or dot
     country_tag=`echo $country_name | sed 's/[^A-Za-z0-9 .-]*//g'`
-    if [ "$add_tags" ]; then
+    if [ "$add_tags" == "Baseline" ]; then
       tags="[{\"name\":\""$group_id"\"}, {\"name\":\"baseline\"},{\"name\":\"preparedness\"}]"
     fi
+		if [ "$add_tags" == "RW" ]; then
+			tags="[{\"name\":\""$group_id"\"}, {\"name\":\"RW\"},{\"name\":\"reports\"},{\"name\":\"disaster\"}]"
+		fi
+		if [ "$add_tags" == "FTS" ]; then
+			tags="[{\"name\":\""$group_id"\"}, {\"name\":\"humanitarian finance\"}]"
+		fi
     . scripts/addPackage.sh
 
     country_code_upper=`echo $country | tr -d ' '`
@@ -155,9 +161,9 @@ function add_countries(){
 }
 
 #DON'T Change order - Group update will happen just for the first run since it will override existing datasets if it's run afterwards!
-add_countries "Baseline Data" "A compilation of time-series data from a variety of sources reported at the national level. Additional information about the sources is available in the file." "Baseline" "" "yes" "Other : Varies, see files"
-add_countries "RW indicators" "ReliefWeb indicators reported at the national level." "RW" "RW" '' "The indicators in this dataset were built from data extracted from the ReliefWeb API"
-add_countries "FTS indicators" "Selected indicators from the Financial Tracking System reported at the national level." "FTS" "FTS" '' "The indicators in this dataset were built from data provided by the Financial Tracking Service (FTS) run by UNOCHA. FTS compiles the funding data based on information that is self-reported by donors and receiving organizations."
+add_countries "Baseline Data" "A compilation of time-series data from a variety of sources reported at the national level. Additional information about the sources is available in the file." "Baseline" "" "Baseline" "Other : Varies, see files"
+add_countries "RW indicators" "ReliefWeb indicators reported at the national level." "RW" "RW" "RW" "The indicators in this dataset were built from data extracted from the ReliefWeb API"
+add_countries "FTS indicators" "Selected indicators from the Financial Tracking System reported at the national level." "FTS" "FTS" "FTS" "The indicators in this dataset were built from data provided by the Financial Tracking Service (FTS) run by UNOCHA. FTS compiles the funding data based on information that is self-reported by donors and receiving organizations."
 
 #Create group for indicators
 group_id=world
@@ -178,8 +184,7 @@ function add_new_indicators(){
   do
     #getting indicator metadata
     indicator_meta=`echo $line | sed "s/\;/ /g" | sed "s/\"/'/g"`
-
-    ckan_source=`echo $indicator_meta | cut -d '|' -f5`
+    ckan_source=`echo $indicator_meta | cut -d '|' -f6`
     ckan_license=`echo $indicator_meta | cut -d '|' -f14`
     ckan_date_min=`echo $indicator_meta | cut -d '|' -f11`
     ckan_date_max=`echo $indicator_meta | cut -d '|' -f12`
@@ -199,7 +204,16 @@ function add_new_indicators(){
     dataset_name=`echo $indicator | sed 's/\&/ and /g'`
     echo "Dataset name:"$dataset_name
     dataset_description="" #manually placed
-    tags="" #manually placed
+		if [ "$indicator_file_name_ext" == "Baseline" ]; then
+			tags="" #manually placed
+		fi
+		if [ "$indicator_file_name_ext" == "RW" ]; then
+			tags="[{\"name\":\"RW\"}]"
+		fi
+		if [ "$indicator_file_name_ext" == "FTS" ]; then
+			tags="[{\"name\":\"humanitarian finance\"}, {\"name\":\"fts\"}]"
+		fi
+
     #echo "Inserting indicator with code "$dataset_id" for "$dataset_name""
    . scripts/addPackage.sh
 
