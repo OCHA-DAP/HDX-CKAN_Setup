@@ -241,13 +241,13 @@ function add_new_indicators(){
     if [ "$indicator_file_name_ext" == "RW" ]; then
       #RW
       xls_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/xlsx"
-			csv_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/csv"
+			csv_resource_url_start="${CPS_URL}/api/exporter/indicator/csv/${indicator_type}/source/${source_code}"
       rdm_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/readme"
     else
       if [ "$indicator_file_name_ext" == "FTS" ]; then
         #FTS
         xls_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/xlsx"
-				csv_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/csv"
+				csv_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/csv/${indicator_type}/source/${source_code}"
         rdm_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/readme"
       else
         if [ "$indicator_file_name_ext" == "UNHCR" ]; then
