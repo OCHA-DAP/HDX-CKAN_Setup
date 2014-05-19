@@ -59,9 +59,10 @@ fi
 if [ "$ckan_license_id" ]; then
 	extra_json=$extra_json" \"license_id\":\"$ckan_license_id\", "
 fi
-#
-# if [ "$ckan_date" ]; then
-# fi
+
+if [ "$ckan_date_min" ]; then
+	extra_json=$extra_json" \"dataset_date\":\"01/01/$ckan_date_min-12/31/$ckan_date_max\", "
+fi
 
 if [ "$ckan_methodology" ]; then
 	extra_json=$extra_json" \"methodology\":\"$ckan_methodology\", "

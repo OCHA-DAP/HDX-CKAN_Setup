@@ -196,6 +196,7 @@ function add_new_indicators(){
     ckan_date_max=`echo $indicator_meta | cut -d '|' -f12`
     ckan_methodology="`echo $indicator_meta | cut -d '|' -f10`"
     ckan_caveats=`echo $indicator_meta | cut -d '|' -f13`
+		ckan_caveats="" #do override existing caveats as specified in the doc
     # echo "Row: "$indicator_meta
     # echo "Source:"$ckan_source
     # echo "Meth:"$ckan_methodology
@@ -246,8 +247,8 @@ function add_new_indicators(){
     else
       if [ "$indicator_file_name_ext" == "FTS" ]; then
         #FTS
-        xls_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/xlsx"
-				csv_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/csv/${indicator_type}/source/${source_code}"
+        xls_resource_url_start="${CPS_URL}/api/exporter/indicator/xlsx/${indicator_type}/source/${source_code}"
+				csv_resource_url_start="${CPS_URL}/api/exporter/indicator/csv/${indicator_type}/source/${source_code}"
         rdm_resource_url_start="${CPS_URL}/api/exporter/indicator${indicator_url_ext}/readme"
       else
         if [ "$indicator_file_name_ext" == "UNHCR" ]; then
