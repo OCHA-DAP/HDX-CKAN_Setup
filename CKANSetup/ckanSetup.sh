@@ -107,11 +107,7 @@ function add_countries(){
     #convert the group id to lowercase and remove spaces so that CKAN is ok with it
     group_id=`echo $country | tr '[:upper:]' '[:lower:]' | tr -d ' '`
     group_id_ext=`echo $country_name_extension | tr '[:upper:]' '[:lower:]' | tr ' ' '_'`
-    if [ "$country_file_name_ext" == "Baseline" ]; then
-      group_update="true"
-    else
-      group_update="false"
-    fi
+    group_update="false" #Disable group update because it removes non-script datasets from group
 
     group_name="$country_name"
     relief_url="http://reliefweb.int/country/"$group_id
