@@ -6,7 +6,7 @@ import requests
 import json
 from io import StringIO
 server = 'http://localhost:5000'
-key = 'f19c12a8-4ed6-4f66-9759-3372cddce8ed'
+key = 'tobeadded'
 topics = ['humanitarian profile']
 
 
