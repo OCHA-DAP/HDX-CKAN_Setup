@@ -1,0 +1,12 @@
+[{
+  "resource_id": "0271d690-fffc-4f21-b13d-562292b9adb3",
+  "schema": {
+    "fields": [
+        { "id": "Indicator", "type": "text" }, 
+        { "id": "Dates", "type": "text" }, 
+        { "id": "Value", "type": "text" }
+    ]
+  },
+  "indexes": ["Indicator"]
+}
+]
